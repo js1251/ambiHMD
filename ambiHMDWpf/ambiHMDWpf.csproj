@@ -1,0 +1,30 @@
+﻿<!--<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">-->
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<!--<TargetFramework>net6.0-windows$([Microsoft.Build.Utilities.ToolLocationHelper]::GetLatestSDKTargetPlatformVersion('Windows', '10.0'))</TargetFramework>-->
+		<!--<TargetFramework>net472</TargetFramework>-->
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<UseWPF>true</UseWPF>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="MonoGame.Framework.WindowsDX" Version="3.8.1.303" />
+		<PackageReference Include="MonoGame.Content.Builder" Version="3.7.0.8" />
+		<!--<PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />-->
+		<!--<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />-->
+		<!--<PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.18362.2002-preview" />-->
+		<!--<PackageReference Include="SharpDX" Version="4.2.0" />-->
+		<!--https://stackoverflow.com/questions/70266249/referencing-a-windows-metadata-component-directly-when-targeting-net-5-or-highe-->
+		<!--<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.0.1" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+		<MonoGameContentReference Include="**\*.mgcb" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Windows.UI.Composition-Win32-Samples\dotnet\WPF\ScreenCapture\Composition.WindowsRuntimeHelpers\Composition.WindowsRuntimeHelpers.csproj" />
+	</ItemGroup>
+</Project>
