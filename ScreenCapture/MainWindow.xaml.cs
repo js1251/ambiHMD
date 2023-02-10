@@ -22,7 +22,7 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using CaptureSampleCore;
+using CaptureCore;
 using Composition.WindowsRuntimeHelpers;
 using System;
 using System.Collections.ObjectModel;
@@ -42,36 +42,31 @@ namespace WPFCaptureSample {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+        public int LedsPerEye {
+            get => _ledsPerEye;
+            set {
+                _ledsPerEye = value;
+                SetLedAmount(value);
+            }
+        }
+
         private IntPtr _hwnd;
         private Compositor _compositor;
         private CompositionTarget _target;
         private ContainerVisual _root;
 
-        private BasicSampleApplication _sample;
+        private CaptureApplication _sample;
         private ObservableCollection<Process> _processes;
         private ObservableCollection<MonitorInfo> _monitors;
+        private int _ledsPerEye = 6; // TODO: read from settings
 
         public MainWindow() {
             InitializeComponent();
 
 #if DEBUG
             // Force graphicscapture.dll to load.
-            var picker = new GraphicsCapturePicker();
+            var _ = new GraphicsCapturePicker();
 #endif
-        }
-
-        private async void PickerButton_Click(object sender, RoutedEventArgs e) {
-            StopCapture();
-            WindowComboBox.SelectedIndex = -1;
-            MonitorComboBox.SelectedIndex = -1;
-            await StartPickerCaptureAsync();
-        }
-
-        private void PrimaryMonitorButton_Click(object sender, RoutedEventArgs e) {
-            StopCapture();
-            WindowComboBox.SelectedIndex = -1;
-            MonitorComboBox.SelectedIndex = -1;
-            StartPrimaryMonitorCapture();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -80,10 +75,10 @@ namespace WPFCaptureSample {
 
             var presentationSource = PresentationSource.FromVisual(this);
             var dpiX = 1.0;
-            var dpiY = 1.0;
+            //var dpiY = 1.0;
             if (presentationSource != null) {
                 dpiX = presentationSource.CompositionTarget.TransformToDevice.M11;
-                dpiY = presentationSource.CompositionTarget.TransformToDevice.M22;
+                //dpiY = presentationSource.CompositionTarget.TransformToDevice.M22;
             }
 
             var controlsWidth = (float)(ControlsGrid.ActualWidth * dpiX);
@@ -91,12 +86,35 @@ namespace WPFCaptureSample {
             InitComposition(controlsWidth);
             InitWindowList();
             InitMonitorList();
+
+            // SetLedAmount();
+            SetLedAmount(LedsPerEye);
         }
 
-        private void StopButton_Click(object sender, RoutedEventArgs e) {
+        private void InitComposition(float controlsWidth) {
+            // Create the compositor.
+            _compositor = new Compositor();
+
+            // Create a target for the window.
+            _target = _compositor.CreateDesktopWindowTarget(_hwnd, true);
+
+            // Attach the root visual.
+            _root = _compositor.CreateContainerVisual();
+            _root.RelativeSizeAdjustment = Vector2.One;
+            _root.Size = new Vector2(-controlsWidth, 0);
+            _root.Offset = new Vector3(controlsWidth, 0, 0);
+            _target.Root = _root;
+
+            // Setup the rest of the sample application.
+            _sample = new CaptureApplication(_compositor);
+            _root.Children.InsertAtTop(_sample.Visual);
+        }
+
+        private async void PickerButton_Click(object sender, RoutedEventArgs e) {
             StopCapture();
             WindowComboBox.SelectedIndex = -1;
             MonitorComboBox.SelectedIndex = -1;
+            await StartPickerCaptureAsync();
         }
 
         private void WindowComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -119,6 +137,13 @@ namespace WPFCaptureSample {
             }
         }
 
+        //private void PrimaryMonitorButton_Click(object sender, RoutedEventArgs e) {
+        //    StopCapture();
+        //    WindowComboBox.SelectedIndex = -1;
+        //    MonitorComboBox.SelectedIndex = -1;
+        //    StartPrimaryMonitorCapture();
+        //}
+
         private void MonitorComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             var comboBox = (ComboBox)sender;
             var monitor = (MonitorInfo)comboBox.SelectedItem;
@@ -139,29 +164,78 @@ namespace WPFCaptureSample {
             }
         }
 
-        private void InitComposition(float controlsWidth) {
-            // Create the compositor.
-            _compositor = new Compositor();
-
-            // Create a target for the window.
-            _target = _compositor.CreateDesktopWindowTarget(_hwnd, true);
-
-            // Attach the root visual.
-            _root = _compositor.CreateContainerVisual();
-            _root.RelativeSizeAdjustment = Vector2.One;
-            _root.Size = new Vector2(-controlsWidth, 0);
-            _root.Offset = new Vector3(controlsWidth, 0, 0);
-            _target.Root = _root;
-
-            // Setup the rest of the sample application.
-            _sample = new BasicSampleApplication(_compositor);
-            _root.Children.InsertAtTop(_sample.Visual);
+        private void BlurSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            var blur = e.NewValue / ((Slider)sender).Maximum;
+            BlurLeds((float)blur);
         }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e) {
+            StopCapture();
+            WindowComboBox.SelectedIndex = -1;
+            MonitorComboBox.SelectedIndex = -1;
+        }
+
+        #region Control Helpers
+
+        private void BlurLeds(float blur) {
+            if (blur < 0 || blur > 1) {
+                throw new ArgumentOutOfRangeException("Led blur amount can only be between 0 and 1");
+            }
+
+            foreach (var rightChild in RightLeds.Children) {
+                if (rightChild is LedPreview ledPreview) {
+                    ledPreview.Blur = blur;
+                }
+            }
+
+            foreach (var leftChild in LeftLeds.Children) {
+                if (leftChild is LedPreview ledPreview) {
+                    ledPreview.Blur = blur;
+                }
+            }
+        }
+
+        private void SetLedAmount(int ledsPerEye) {
+            var currentLedAmount = LeftLeds.Children.Count;
+
+            if (ledsPerEye == currentLedAmount) {
+                return;
+            }
+
+            var difference = ledsPerEye - currentLedAmount;
+
+            if (difference > 0) {
+                // add led preview controls
+                for (var i = 0; i < difference; i++) {
+                    LeftLeds.Children.Add(CreateNewLedPreview());
+                    RightLeds.Children.Add(CreateNewLedPreview());
+                }
+            } else {
+                // remove led preview controls
+                for (var i = 0; i < Math.Abs(difference); i++) {
+                    LeftLeds.Children.Remove(LeftLeds.Children[0]);
+                    RightLeds.Children.Remove(RightLeds.Children[0]);
+                }
+            }
+        }
+
+        private LedPreview CreateNewLedPreview() {
+            return new LedPreview {
+                Size = 25, // TODO: dont hardcode
+                Margin = new Thickness(0, 10, 0, 10) // TODO: dont hardcode
+            };
+        }
+
+        #endregion Control Helpers
+
+        #region Capture Helpers
 
         private void InitWindowList() {
             if (ApiInformation.IsApiContractPresent(typeof(Windows.Foundation.UniversalApiContract).FullName, 8)) {
                 var processesWithWindows = from p in Process.GetProcesses()
-                    where !string.IsNullOrWhiteSpace(p.MainWindowTitle) && WindowEnumerationHelper.IsWindowValidForCapture(p.MainWindowHandle) select p;
+                    where !string.IsNullOrWhiteSpace(p.MainWindowTitle) &&
+                          WindowEnumerationHelper.IsWindowValidForCapture(p.MainWindowHandle)
+                    select p;
                 _processes = new ObservableCollection<Process>(processesWithWindows);
                 WindowComboBox.ItemsSource = _processes;
             } else {
@@ -175,7 +249,7 @@ namespace WPFCaptureSample {
                 MonitorComboBox.ItemsSource = _monitors;
             } else {
                 MonitorComboBox.IsEnabled = false;
-                PrimaryMonitorButton.IsEnabled = false;
+                //PrimaryMonitorButton.IsEnabled = false;
             }
         }
 
@@ -203,13 +277,15 @@ namespace WPFCaptureSample {
             }
         }
 
-        private void StartPrimaryMonitorCapture() {
-            var monitor = (from m in MonitorEnumerationHelper.GetMonitors() where m.IsPrimary select m).First();
-            StartHmonCapture(monitor.Hmon);
-        }
+        //private void StartPrimaryMonitorCapture() {
+        //    var monitor = (from m in MonitorEnumerationHelper.GetMonitors() where m.IsPrimary select m).First();
+        //    StartHmonCapture(monitor.Hmon);
+        //}
 
         private void StopCapture() {
             _sample.StopCapture();
         }
+
+        #endregion Capture Helpers
     }
 }

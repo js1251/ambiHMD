@@ -1,9 +1,8 @@
-﻿<UserControl x:Class="WPFCaptureSample.LedPreview"
+﻿<UserControl x:Class="WPFCaptureSample.customcontrols.LedPreview"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:WPFCaptureSample"
              mc:Ignorable="d"
              x:Name="Control">
     <Grid>
@@ -13,7 +12,7 @@
             Height="{Binding Size, ElementName=Control, Mode=OneWay}"
             Fill="{Binding Color, ElementName=Control, Mode=OneWay}">
             <Ellipse.Effect>
-                <BlurEffect Radius="{Binding Blur, ElementName=Control, Mode=OneWay}" />
+                <BlurEffect Radius="{Binding BlurAmount}"/>
             </Ellipse.Effect>
         </Ellipse>
     </Grid>

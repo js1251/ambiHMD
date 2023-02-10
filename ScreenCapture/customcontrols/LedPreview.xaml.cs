@@ -1,19 +1,18 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace WPFCaptureSample {
+namespace WPFCaptureSample.customcontrols {
     public partial class LedPreview : UserControl {
         // Resharper disable once InconsistentNaming
         public static readonly DependencyProperty SizeProperty =
             DependencyProperty.Register("Size",
-                typeof(float),
+                typeof(int),
                 typeof(LedPreview),
-                new PropertyMetadata(25f));
+                new PropertyMetadata(25));
 
-        public float Size {
-            get => (float)GetValue(SizeProperty);
+        public SolidColorBrush Size {
+            get => (SolidColorBrush)GetValue(SizeProperty);
             set => SetValue(SizeProperty, value);
         }
 
@@ -27,25 +26,6 @@ namespace WPFCaptureSample {
         public SolidColorBrush Color {
             get => (SolidColorBrush)GetValue(ColorProperty);
             set => SetValue(ColorProperty, value);
-        }
-
-        // Resharper disable once InconsistentNaming
-        public static readonly DependencyProperty BlurProperty =
-            DependencyProperty.Register("Blur",
-                typeof(float),
-                typeof(LedPreview),
-                new PropertyMetadata(1f));
-
-        public float Blur {
-            get => (float)GetValue(BlurProperty);
-            set {
-                if (value < 0 || value > 1) {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Value must be between 0 and 1.");
-                }
-
-                var maxBlurSize = Size * 2f;
-                SetValue(BlurProperty, maxBlurSize * value);
-            }
         }
 
         public LedPreview() {

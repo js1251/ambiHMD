@@ -11,6 +11,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Composition.WindowsRuntimeHelpers\Composition.WindowsRuntimeHelpers.csproj" />
+    <ProjectReference Include="..\FrameProcessing\FrameProcessing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="example.hlsl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
