@@ -25,6 +25,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Windows.Graphics.DirectX.Direct3D11;
+using SharpDX.Direct3D11;
 
 namespace Composition.WindowsRuntimeHelpers
 {
@@ -74,7 +75,7 @@ namespace Composition.WindowsRuntimeHelpers
         {
             var d3dDevice = new SharpDX.Direct3D11.Device(
                 useWARP ? SharpDX.Direct3D.DriverType.Software : SharpDX.Direct3D.DriverType.Hardware,
-                SharpDX.Direct3D11.DeviceCreationFlags.BgraSupport);
+                SharpDX.Direct3D11.DeviceCreationFlags.BgraSupport | DeviceCreationFlags.Debug);
             var device = CreateDirect3DDeviceFromSharpDXDevice(d3dDevice);
             return device;
         }
