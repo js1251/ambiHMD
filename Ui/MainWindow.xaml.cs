@@ -22,7 +22,6 @@
 //  THE SOFTWARE.
 //  ---------------------------------------------------------------------------------
 
-using CaptureCore;
 using Composition.WindowsRuntimeHelpers;
 using System;
 using System.Collections.ObjectModel;
@@ -36,8 +35,10 @@ using System.Windows.Interop;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.Capture;
 using Windows.UI.Composition;
+using CaptureCore;
+using Ui.customcontrols;
 
-namespace WPFCaptureSample {
+namespace Ui {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>

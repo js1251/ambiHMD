@@ -28,7 +28,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Windows.Foundation;
 
-namespace WPFCaptureSample
+namespace Ui
 {
     class MonitorInfo
     {

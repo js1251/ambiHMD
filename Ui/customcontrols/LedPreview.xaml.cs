@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace WPFCaptureSample {
+namespace Ui.customcontrols {
     public partial class LedPreview : UserControl {
         // Resharper disable once InconsistentNaming
         public static readonly DependencyProperty SizeProperty =

@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4DDD37B1-E3E8-46C1-BDE9-3039A93DAF27}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>WPFCaptureSample</RootNamespace>
-    <AssemblyName>WPFCaptureSample</AssemblyName>
+    <RootNamespace>Ui</RootNamespace>
+    <AssemblyName>Ui</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -55,14 +55,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="LedPreview.xaml.cs">
-      <DependentUpon>LedPreview.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="customcontrols\LedPreview.xaml.cs" />
     <Compile Include="MonitorEnumerationHelper.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
-    <Page Include="LedPreview.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="customcontrols\LedPreview.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -104,8 +102,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CaptureSampleCore\CaptureCore.csproj">
-      <Project>{502b19a1-292a-4e7f-9c19-b16ca42f1f82}</Project>
+    <ProjectReference Include="..\CaptureCore\CaptureCore.csproj">
+      <Project>{502B19A1-292A-4E7F-9C19-B16CA42F1F82}</Project>
       <Name>CaptureCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\Composition.WindowsRuntimeHelpers\Composition.WindowsRuntimeHelpers.csproj">
@@ -127,5 +125,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

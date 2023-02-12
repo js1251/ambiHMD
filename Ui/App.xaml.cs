@@ -26,15 +26,12 @@ using Composition.WindowsRuntimeHelpers;
 using System.Windows;
 using Windows.System;
 
-namespace WPFCaptureSample
-{
+namespace Ui {
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
-    {
-        public App()
-        {
+    public partial class App : Application {
+        public App() {
             _controller = CoreMessagingHelper.CreateDispatcherQueueControllerForCurrentThread();
         }
 
