@@ -27,6 +27,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:customcontrols="clr-namespace:Ui.customcontrols"
         mc:Ignorable="d"
         Title="ambiHMD" Height="450" Width="800"
         Loaded="Window_Loaded"
@@ -34,7 +35,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
-            <ColumnDefinition />
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid x:Name="ControlsGrid" Grid.Column="0">
@@ -160,7 +161,7 @@
                         </StackPanel>
 
                         <StackPanel>
-                            <Label Content="LED Preview Blur" />
+                            <Label Content="LED Preview BlurPercentage" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -194,28 +195,9 @@
         </Grid>
 
         <Grid Grid.Column="1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel
-                    x:Name="LeftLeds"
-                    Grid.Column="0"
-                    VerticalAlignment="Center"
-                    Margin="0, 0, 20, 0" />
-
-                <!--What will become the capture playback-->
-                <Rectangle Grid.Column="1" />
-
-                <StackPanel
-                    x:Name="RightLeds"
-                    Grid.Column="2"
-                    VerticalAlignment="Center"
-                    Margin="20, 0, 20, 0" />
-            </Grid>
+            <customcontrols:HMDPreview
+                Height="400"
+                x:Name="HMDPreview" />
         </Grid>
     </Grid>
 </Window>

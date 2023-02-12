@@ -1,35 +1,10 @@
-﻿//  ---------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-//  The MIT License (MIT)
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
-//  ---------------------------------------------------------------------------------
-
-using System;
+﻿using System;
 using System.IO;
 using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.UI.Composition;
 using Composition.WindowsRuntimeHelpers;
-using FrameProcessing;
 using SharpDX.Direct3D11;
 
 namespace CaptureCore {
@@ -55,7 +30,7 @@ namespace CaptureCore {
         private readonly IDirect3DDevice _device;
         private WindowCapture _capture;
         
-        private readonly LedComputeShader _ledShader;
+        private readonly ComputeShaderCompileHelper _ledShader;
         private FrameProcessor _frameProcessor;
         private int _numberOfLedPerEye;
 
@@ -77,7 +52,7 @@ namespace CaptureCore {
             shadow.Mask = _brush;
 
             _content = _compositor.CreateSpriteVisual();
-            _content.AnchorPoint = new Vector2(0.5f);
+            _content.AnchorPoint = new Vector2(0.5f, 0.5f);
             _content.RelativeOffsetAdjustment = new Vector3(0.5f, 0.5f, 0);
             _content.RelativeSizeAdjustment = Vector2.One;
             _content.Size = new Vector2(-80, -80);
@@ -85,7 +60,7 @@ namespace CaptureCore {
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
 
-            _ledShader = new LedComputeShader(new FileInfo("example.hlsl"));
+            _ledShader = new ComputeShaderCompileHelper(new FileInfo("example.hlsl"));
         }
 
         public Visual Visual => _root;
@@ -126,13 +101,7 @@ namespace CaptureCore {
             for (var i = 0; i < ledAmount; i++) {
                 var colorData = ledData.GetColor(i);
                 ColorChanged?.Invoke(this, colorData);
-
-                // TODO: temporary
-                if (i == 0) {
-                    return;
-                }
             }
-
         }
     }
 }

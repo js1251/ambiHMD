@@ -37,8 +37,8 @@ using Windows.Foundation.Metadata;
 using Windows.Graphics.Capture;
 using Windows.UI.Composition;
 using CaptureCore;
-using Ui.customcontrols;
-using Color = System.Windows.Media.Color;
+using CompositionTarget = Windows.UI.Composition.CompositionTarget;
+using ContainerVisual = Windows.UI.Composition.ContainerVisual;
 
 namespace Ui {
     public partial class MainWindow : Window {
@@ -46,14 +46,14 @@ namespace Ui {
             get => _ledsPerEye;
             set {
                 _ledsPerEye = value;
-                SetLedAmount(value);
+                HMDPreview.LedPerEye = value;
             }
         }
 
         private IntPtr _hwnd;
         private Compositor _compositor;
-        private Windows.UI.Composition.CompositionTarget _target;
-        private Windows.UI.Composition.ContainerVisual _root;
+        private CompositionTarget _target;
+        private ContainerVisual _root;
 
         private CaptureApplication _captureApp;
         private ObservableCollection<Process> _processes;
@@ -88,7 +88,7 @@ namespace Ui {
             InitMonitorList();
 
             // SetLedAmount();
-            SetLedAmount(LedsPerEye);
+            HMDPreview.LedPerEye = LedsPerEye;
         }
 
         private void InitComposition(float controlsWidth) {
@@ -111,10 +111,7 @@ namespace Ui {
 
             _captureApp.ColorChanged += (sender, color) => {
                 var (a, r, g, b) = color;
-
-                var led = (LedPreview)LeftLeds.Children[0];
-                var colorBrush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
-                led.Color = colorBrush;
+                HMDPreview.SetLedColor(0, Color.FromArgb(a, r, g, b));
             };
         }
 
@@ -174,7 +171,7 @@ namespace Ui {
 
         private void BlurSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             var blur = e.NewValue / ((Slider)sender).Maximum;
-            BlurLeds((float)blur);
+            HMDPreview.BlurPercentage = (float)blur;
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e) {
@@ -182,61 +179,6 @@ namespace Ui {
             WindowComboBox.SelectedIndex = -1;
             MonitorComboBox.SelectedIndex = -1;
         }
-
-        #region Control Helpers
-
-        private void BlurLeds(float blur) {
-            if (blur < 0 || blur > 1) {
-                throw new ArgumentOutOfRangeException("Led blur amount can only be between 0 and 1");
-            }
-
-            foreach (var rightChild in RightLeds.Children) {
-                if (rightChild is LedPreview ledPreview) {
-                    ledPreview.Blur = blur;
-                }
-            }
-
-            foreach (var leftChild in LeftLeds.Children) {
-                if (leftChild is LedPreview ledPreview) {
-                    ledPreview.Blur = blur;
-                }
-            }
-        }
-
-        private void SetLedAmount(int ledsPerEye) {
-            var currentLedAmount = LeftLeds.Children.Count;
-
-            if (ledsPerEye == currentLedAmount) {
-                return;
-            }
-
-            var difference = ledsPerEye - currentLedAmount;
-
-            if (difference > 0) {
-                // add led preview controls
-                for (var i = 0; i < difference; i++) {
-                    LeftLeds.Children.Add(CreateNewLedPreview());
-                    RightLeds.Children.Add(CreateNewLedPreview());
-                }
-            } else {
-                // remove led preview controls
-                for (var i = 0; i < Math.Abs(difference); i++) {
-                    LeftLeds.Children.Remove(LeftLeds.Children[0]);
-                    RightLeds.Children.Remove(RightLeds.Children[0]);
-                }
-            }
-
-            _captureApp.NumberOfLedsPerEye = ledsPerEye;
-        }
-
-        private LedPreview CreateNewLedPreview() {
-            return new LedPreview {
-                Size = 25, // TODO: dont hardcode
-                Margin = new Thickness(0, 10, 0, 10) // TODO: dont hardcode
-            };
-        }
-
-        #endregion Control Helpers
 
         #region Capture Helpers
 

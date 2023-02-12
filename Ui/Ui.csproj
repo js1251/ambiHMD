@@ -38,6 +38,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -56,13 +58,28 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="customcontrols\LEDModel.cs" />
     <Compile Include="customcontrols\LedPreview.xaml.cs" />
+    <Compile Include="customcontrols\HMDPreview.xaml.cs">
+      <DependentUpon>HMDPreview.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="customcontrols\LEDStack.xaml.cs">
+      <DependentUpon>LEDStack.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MonitorEnumerationHelper.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
     <Page Include="customcontrols\LedPreview.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="customcontrols\HMDPreview.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="customcontrols\LEDStack.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -111,10 +128,6 @@
     <ProjectReference Include="..\Composition.WindowsRuntimeHelpers\Composition.WindowsRuntimeHelpers.csproj">
       <Project>{ec969287-3d35-410a-806c-0baaa7564911}</Project>
       <Name>Composition.WindowsRuntimeHelpers</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FrameProcessing\FrameProcessing.csproj">
-      <Project>{07c40dd8-4d4a-4863-ba31-d1356f61f563}</Project>
-      <Name>FrameProcessing</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

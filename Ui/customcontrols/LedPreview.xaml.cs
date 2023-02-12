@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -38,7 +37,7 @@ namespace Ui.customcontrols {
 
         // Resharper disable once InconsistentNaming
         public static readonly DependencyProperty BlurProperty =
-            DependencyProperty.Register("Blur",
+            DependencyProperty.Register("BlurPercentage",
                 typeof(float),
                 typeof(LedPreview),
                 new PropertyMetadata(1f));
