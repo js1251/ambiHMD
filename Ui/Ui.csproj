@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -57,6 +58,7 @@
     </ApplicationDefinition>
     <Compile Include="customcontrols\LedPreview.xaml.cs" />
     <Compile Include="MonitorEnumerationHelper.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
     <Page Include="customcontrols\LedPreview.xaml">
       <Generator>MSBuild:Compile</Generator>

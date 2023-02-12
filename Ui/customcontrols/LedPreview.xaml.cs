@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Ui.Annotations;
 
 namespace Ui.customcontrols {
-    public partial class LedPreview : UserControl {
+    public partial class LedPreview : UserControl, INotifyPropertyChanged {
         // Resharper disable once InconsistentNaming
         public static readonly DependencyProperty SizeProperty =
             DependencyProperty.Register("Size",
@@ -26,7 +30,10 @@ namespace Ui.customcontrols {
 
         public SolidColorBrush Color {
             get => (SolidColorBrush)GetValue(ColorProperty);
-            set => SetValue(ColorProperty, value);
+            set {
+                SetValue(ColorProperty, value);
+                OnPropertyChanged(nameof(Color));
+            }
         }
 
         // Resharper disable once InconsistentNaming
@@ -50,6 +57,12 @@ namespace Ui.customcontrols {
 
         public LedPreview() {
             InitializeComponent();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

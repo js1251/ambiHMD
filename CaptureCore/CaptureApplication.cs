@@ -27,15 +27,15 @@ using System.IO;
 using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
-using Windows.UI;
 using Windows.UI.Composition;
-using Windows.UI.Xaml.Media;
 using Composition.WindowsRuntimeHelpers;
 using FrameProcessing;
 using SharpDX.Direct3D11;
 
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
+
+        public event EventHandler<(byte, byte, byte, byte)> ColorChanged;
         public int NumberOfLedsPerEye {
             private get => _numberOfLedPerEye;
             set {
@@ -54,7 +54,7 @@ namespace CaptureCore {
 
         private readonly IDirect3DDevice _device;
         private WindowCapture _capture;
-
+        
         private readonly LedComputeShader _ledShader;
         private FrameProcessor _frameProcessor;
         private int _numberOfLedPerEye;
@@ -120,22 +120,19 @@ namespace CaptureCore {
         }
 
         private void UpdateLedValues(object sender, Texture2D texture) {
-            var ledValueData = _frameProcessor.FrocessFrame(texture);
+            var ledData = _frameProcessor.ProcessFrame(texture);
+            var ledAmount = NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES;
 
-            // TODO: this probably introduces a lot of latency
-            for (var i = 0; i < NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES; i++) {
-                var color = GetColor(ledValueData, i);
-                // TODO: update preview led color
+            for (var i = 0; i < ledAmount; i++) {
+                var colorData = ledData.GetColor(i);
+                ColorChanged?.Invoke(this, colorData);
+
+                // TODO: temporary
+                if (i == 0) {
+                    return;
+                }
             }
 
-            // TODO: send to Arduino api
-        }
-
-        private SolidColorBrush GetColor(byte[] ledValueData, int index) {
-            var singleLedData = new byte[FrameProcessor.SIZE_OF_DATAPOINT];
-            ledValueData.CopyTo(singleLedData, FrameProcessor.SIZE_OF_DATAPOINT * index);
-            var color = Color.FromArgb(singleLedData[3], singleLedData[0], singleLedData[1], singleLedData[2]);
-            return new SolidColorBrush(color);
         }
     }
 }

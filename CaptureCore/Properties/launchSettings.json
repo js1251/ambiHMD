@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CaptureCore": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

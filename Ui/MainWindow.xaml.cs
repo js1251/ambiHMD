@@ -32,16 +32,15 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.Capture;
 using Windows.UI.Composition;
 using CaptureCore;
 using Ui.customcontrols;
+using Color = System.Windows.Media.Color;
 
 namespace Ui {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window {
         public int LedsPerEye {
             get => _ledsPerEye;
@@ -53,10 +52,10 @@ namespace Ui {
 
         private IntPtr _hwnd;
         private Compositor _compositor;
-        private CompositionTarget _target;
-        private ContainerVisual _root;
+        private Windows.UI.Composition.CompositionTarget _target;
+        private Windows.UI.Composition.ContainerVisual _root;
 
-        private CaptureApplication _sample;
+        private CaptureApplication _captureApp;
         private ObservableCollection<Process> _processes;
         private ObservableCollection<MonitorInfo> _monitors;
         private int _ledsPerEye = 6; // TODO: read from settings
@@ -107,8 +106,16 @@ namespace Ui {
             _target.Root = _root;
 
             // Setup the rest of the sample application.
-            _sample = new CaptureApplication(_compositor);
-            _root.Children.InsertAtTop(_sample.Visual);
+            _captureApp = new CaptureApplication(_compositor);
+            _root.Children.InsertAtTop(_captureApp.Visual);
+
+            _captureApp.ColorChanged += (sender, color) => {
+                var (a, r, g, b) = color;
+
+                var led = (LedPreview)LeftLeds.Children[0];
+                var colorBrush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+                led.Color = colorBrush;
+            };
         }
 
         private async void PickerButton_Click(object sender, RoutedEventArgs e) {
@@ -131,7 +138,7 @@ namespace Ui {
             var hwnd = process.MainWindowHandle;
             try {
                 StartHwndCapture(hwnd);
-            } catch (Exception) {
+            } catch(Exception) {
                 Debug.WriteLine($"Hwnd 0x{hwnd.ToInt32():X8} is not valid for capture!");
                 _processes.Remove(process);
                 comboBox.SelectedIndex = -1;
@@ -158,7 +165,7 @@ namespace Ui {
             var hmon = monitor.Hmon;
             try {
                 StartHmonCapture(hmon);
-            } catch (Exception) {
+            } catch(Exception) {
                 Debug.WriteLine($"Hmon 0x{hmon.ToInt32():X8} is not valid for capture!");
                 _monitors.Remove(monitor);
                 comboBox.SelectedIndex = -1;
@@ -218,6 +225,8 @@ namespace Ui {
                     RightLeds.Children.Remove(RightLeds.Children[0]);
                 }
             }
+
+            _captureApp.NumberOfLedsPerEye = ledsPerEye;
         }
 
         private LedPreview CreateNewLedPreview() {
@@ -260,21 +269,21 @@ namespace Ui {
             var item = await picker.PickSingleItemAsync();
 
             if (item != null) {
-                _sample.StartCaptureFromItem(item);
+                _captureApp.StartCaptureFromItem(item);
             }
         }
 
         private void StartHwndCapture(IntPtr hwnd) {
             var item = CaptureHelper.CreateItemForWindow(hwnd);
             if (item != null) {
-                _sample.StartCaptureFromItem(item);
+                _captureApp.StartCaptureFromItem(item);
             }
         }
 
         private void StartHmonCapture(IntPtr hmon) {
             var item = CaptureHelper.CreateItemForMonitor(hmon);
             if (item != null) {
-                _sample.StartCaptureFromItem(item);
+                _captureApp.StartCaptureFromItem(item);
             }
         }
 
@@ -284,7 +293,7 @@ namespace Ui {
         //}
 
         private void StopCapture() {
-            _sample.StopCapture();
+            _captureApp.StopCapture();
         }
 
         #endregion Capture Helpers
