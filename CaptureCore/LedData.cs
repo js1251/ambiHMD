@@ -15,7 +15,7 @@
         }
 
         private byte[] GetUnpadded() {
-            var unpadded = new byte[_numberOfLeds * 4]; // RGBA
+            var unpadded = new byte[_numberOfLeds * _stride]; // RGBA
 
             var unpaddedIndex = 0;
             for (var i = 0; i < _numberOfLeds; i += _stride) {

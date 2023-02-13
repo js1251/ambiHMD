@@ -1,12 +1,10 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Ui.Annotations;
 
 namespace Ui.customcontrols {
-    public partial class LEDStack : UserControl, INotifyPropertyChanged {
+    public partial class LEDStack : UserControl {
         public float Size {
             get => _size;
             set {
@@ -31,25 +29,43 @@ namespace Ui.customcontrols {
             }
         }
 
+        public bool IsActive {
+            get => _isActive;
+            set {
+                SetActive(value);
+                _isActive = value;
+            }
+        }
+
+        public bool ShowColorValue {
+            get => _showColorValue;
+            set {
+                SetColorValueEnabled(value);
+                _showColorValue = value;
+            }
+        }
+
         public ObservableCollection<LEDModel> Leds { get; }
 
-        private float _size;
+        private float _size = 25f;
         private float _blurRadius;
         private int _amount;
+        private bool _isActive;
+        private bool _showColorValue;
 
         public LEDStack() {
             Leds = new ObservableCollection<LEDModel>();
 
             InitializeComponent();
         }
-        
+
         public void SetColor(int index, Color color) {
             Leds[index].Brush = new SolidColorBrush(color);
         }
 
-        private void SetBlurPercentage(float percentage) {
+        private void SetBlurPercentage(float radius) {
             foreach (var led in Leds) {
-                led.BlurRadius = led.Size * 2f * percentage;
+                led.BlurRadius = radius;
             }
         }
 
@@ -65,14 +81,22 @@ namespace Ui.customcontrols {
                 Leds.Add(new LEDModel {
                     BlurRadius = BlurRadius,
                     Size = Size,
+                    IsActive = IsActive,
+                    ShowColorValue = ShowColorValue ? Visibility.Visible : Visibility.Hidden,
                 });
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        private void SetActive(bool isActive) {
+            foreach (var led in Leds) {
+                led.IsActive = isActive;
+            }
+        }
 
-        [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        private void SetColorValueEnabled(bool showColorValue) {
+            foreach (var led in Leds) {
+                led.ShowColorValue = showColorValue ? Visibility.Visible : Visibility.Hidden;
+            }
         }
     }
 }

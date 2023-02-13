@@ -10,7 +10,9 @@ using SharpDX.Direct3D11;
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
 
-        public event EventHandler<(byte, byte, byte, byte)> ColorChanged;
+        public delegate void ColorChangedArg(CaptureApplication sender, int index, (byte, byte, byte, byte) colorData);
+
+        public event ColorChangedArg ColorChanged;
         public int NumberOfLedsPerEye {
             private get => _numberOfLedPerEye;
             set {
@@ -100,7 +102,7 @@ namespace CaptureCore {
 
             for (var i = 0; i < ledAmount; i++) {
                 var colorData = ledData.GetColor(i);
-                ColorChanged?.Invoke(this, colorData);
+                ColorChanged?.Invoke(this, i, colorData);
             }
         }
     }

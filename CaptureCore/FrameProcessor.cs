@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace CaptureCore {
     public sealed class FrameProcessor {
         public const int NUMBER_OF_EYES = 2;
-        public const int DATA_STRIDE = 32; //RGBA
+        public const int DATA_STRIDE = 4; //RGBA -> 4 bytes each
 
         public int NumberOfLedsPerEye {
             get => _numberOfLedsPerEye;
@@ -40,7 +40,7 @@ namespace CaptureCore {
             _d3dDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, _workBufferUav);
 
             // send it off to run
-            _d3dDevice.ImmediateContext.Dispatch(32, 32, 1);
+            _d3dDevice.ImmediateContext.Dispatch(NUMBER_OF_EYES, NumberOfLedsPerEye, 1);
 
             // copy the results into staging resource
             _d3dDevice.ImmediateContext.CopyResource(_workBuffer, _stagingBuffer);
@@ -49,7 +49,7 @@ namespace CaptureCore {
             var mapSource = _d3dDevice.ImmediateContext.MapSubresource(_stagingBuffer, 0, MapMode.Read, MapFlags.None);
 
             // copy the data into a managed array
-            var data = new byte[mapSource.RowPitch];
+            var data = new byte[mapSource.RowPitch]; // TODO: why is this 128 and not 48?
             Marshal.Copy(mapSource.DataPointer, data, 0, data.Length);
 
             // unmap the staging resource
@@ -61,7 +61,7 @@ namespace CaptureCore {
         private void InitializeBuffers() {
             _workBuffer = new Buffer(_d3dDevice,
                 new BufferDescription(
-                    GetPaddedSize(NumberOfLedsPerEye * NUMBER_OF_EYES * DATA_STRIDE, 16),
+                    NumberOfLedsPerEye * NUMBER_OF_EYES * DATA_STRIDE,
                     ResourceUsage.Default,
                     BindFlags.ShaderResource | BindFlags.UnorderedAccess,
                     CpuAccessFlags.None,
@@ -74,23 +74,13 @@ namespace CaptureCore {
 
             _stagingBuffer = new Buffer(_d3dDevice,
                 new BufferDescription {
-                    SizeInBytes = GetPaddedSize(NumberOfLedsPerEye * NUMBER_OF_EYES * DATA_STRIDE, 16),
+                    SizeInBytes = NumberOfLedsPerEye * NUMBER_OF_EYES * DATA_STRIDE,
                     CpuAccessFlags = CpuAccessFlags.Read,
                     Usage = ResourceUsage.Staging,
                     BindFlags = BindFlags.None,
                     OptionFlags = ResourceOptionFlags.None,
                     StructureByteStride = DATA_STRIDE
                 });
-        }
-
-        private static int GetPaddedSize(int unpadded, int divisor) {
-            // pad to nearest 16 divisible
-            var remainder = unpadded % divisor;
-            if (remainder != 0) {
-                unpadded += divisor - remainder;
-            }
-
-            return unpadded;
         }
     }
 }

@@ -24,10 +24,14 @@
 
 using Composition.WindowsRuntimeHelpers;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,12 +45,14 @@ using CompositionTarget = Windows.UI.Composition.CompositionTarget;
 using ContainerVisual = Windows.UI.Composition.ContainerVisual;
 
 namespace Ui {
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window, INotifyPropertyChanged {
         public int LedsPerEye {
             get => _ledsPerEye;
             set {
                 _ledsPerEye = value;
+                _captureApp.NumberOfLedsPerEye = value;
                 HMDPreview.LedPerEye = value;
+                OnPropertyChanged();
             }
         }
 
@@ -58,7 +64,7 @@ namespace Ui {
         private CaptureApplication _captureApp;
         private ObservableCollection<Process> _processes;
         private ObservableCollection<MonitorInfo> _monitors;
-        private int _ledsPerEye = 6; // TODO: read from settings
+        private int _ledsPerEye;
 
         public MainWindow() {
             InitializeComponent();
@@ -87,8 +93,7 @@ namespace Ui {
             InitWindowList();
             InitMonitorList();
 
-            // SetLedAmount();
-            HMDPreview.LedPerEye = LedsPerEye;
+            LedsPerEye = 6; // TODO: read from settings
         }
 
         private void InitComposition(float controlsWidth) {
@@ -109,9 +114,17 @@ namespace Ui {
             _captureApp = new CaptureApplication(_compositor);
             _root.Children.InsertAtTop(_captureApp.Visual);
 
-            _captureApp.ColorChanged += (sender, color) => {
-                var (a, r, g, b) = color;
-                HMDPreview.SetLedColor(0, Color.FromArgb(a, r, g, b));
+            _captureApp.ColorChanged += (sender, index, colorData) => {
+                if (LedsPerEye <= 0) {
+                    return;
+                }
+
+                if (index < 0 || index >= LedsPerEye * 2f) {
+                    return;
+                }
+                
+                var (a, r, g, b) = colorData;
+                HMDPreview.SetLedColor(index, Color.FromArgb(a, r, g, b));
             };
         }
 
@@ -135,7 +148,8 @@ namespace Ui {
             var hwnd = process.MainWindowHandle;
             try {
                 StartHwndCapture(hwnd);
-            } catch(Exception) {
+            }
+            catch (Exception) {
                 Debug.WriteLine($"Hwnd 0x{hwnd.ToInt32():X8} is not valid for capture!");
                 _processes.Remove(process);
                 comboBox.SelectedIndex = -1;
@@ -162,7 +176,8 @@ namespace Ui {
             var hmon = monitor.Hmon;
             try {
                 StartHmonCapture(hmon);
-            } catch(Exception) {
+            }
+            catch (Exception) {
                 Debug.WriteLine($"Hmon 0x{hmon.ToInt32():X8} is not valid for capture!");
                 _monitors.Remove(monitor);
                 comboBox.SelectedIndex = -1;
@@ -172,6 +187,10 @@ namespace Ui {
         private void BlurSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             var blur = e.NewValue / ((Slider)sender).Maximum;
             HMDPreview.BlurPercentage = (float)blur;
+        }
+
+        private void LedValues_OnToggled(object sender, RoutedEventArgs e) {
+            HMDPreview.ShowColorValue = ((CheckBox)sender).IsChecked.Value;
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e) {
@@ -190,7 +209,8 @@ namespace Ui {
                     select p;
                 _processes = new ObservableCollection<Process>(processesWithWindows);
                 WindowComboBox.ItemsSource = _processes;
-            } else {
+            }
+            else {
                 WindowComboBox.IsEnabled = false;
             }
         }
@@ -199,7 +219,8 @@ namespace Ui {
             if (ApiInformation.IsApiContractPresent(typeof(Windows.Foundation.UniversalApiContract).FullName, 8)) {
                 _monitors = new ObservableCollection<MonitorInfo>(MonitorEnumerationHelper.GetMonitors());
                 MonitorComboBox.ItemsSource = _monitors;
-            } else {
+            }
+            else {
                 MonitorComboBox.IsEnabled = false;
                 //PrimaryMonitorButton.IsEnabled = false;
             }
@@ -212,6 +233,7 @@ namespace Ui {
 
             if (item != null) {
                 _captureApp.StartCaptureFromItem(item);
+                HMDPreview.LedActive = true;
             }
         }
 
@@ -219,6 +241,7 @@ namespace Ui {
             var item = CaptureHelper.CreateItemForWindow(hwnd);
             if (item != null) {
                 _captureApp.StartCaptureFromItem(item);
+                HMDPreview.LedActive = true;
             }
         }
 
@@ -226,6 +249,7 @@ namespace Ui {
             var item = CaptureHelper.CreateItemForMonitor(hmon);
             if (item != null) {
                 _captureApp.StartCaptureFromItem(item);
+                HMDPreview.LedActive = true;
             }
         }
 
@@ -236,8 +260,15 @@ namespace Ui {
 
         private void StopCapture() {
             _captureApp.StopCapture();
+            HMDPreview.LedActive = false;
         }
 
         #endregion Capture Helpers
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

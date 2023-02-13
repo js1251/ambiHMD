@@ -52,10 +52,6 @@
                         Stroke="WhiteSmoke"
                         StrokeThickness="1" />
 
-                    <Label
-                        Content="Capture"
-                        Margin="0, -15, 0 ,0"/>
-
                     <StackPanel>
                         <!--Picker-->
                         <Button x:Name="PickerButton" Content="Use Picker" Click="PickerButton_Click" Margin="10" />
@@ -89,10 +85,6 @@
                     <Rectangle
                         Stroke="WhiteSmoke"
                         StrokeThickness="1" />
-
-                    <Label
-                        Content="Settings"
-                        Margin="0, -15, 0 ,0"/>
 
                     <StackPanel>
 
@@ -185,7 +177,11 @@
                         </StackPanel>
 
                         <!--Show LED Value checkbox-->
-                        <CheckBox Content="Show LED values" Margin="10" />
+                        <CheckBox
+                            Content="Show LED values"
+                            Margin="10"
+                            Checked="LedValues_OnToggled"
+                            Unchecked="LedValues_OnToggled"/>
 
                     </StackPanel>
                 </Grid>
@@ -197,6 +193,7 @@
         <Grid Grid.Column="1">
             <customcontrols:HMDPreview
                 Height="400"
+                LedSize="35"
                 x:Name="HMDPreview" />
         </Grid>
     </Grid>

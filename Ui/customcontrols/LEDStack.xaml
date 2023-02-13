@@ -23,11 +23,7 @@
                         Width="{Binding Size}"
                         Height="{Binding Size}"
                         Fill="{Binding Brush}"
-                        Opacity="0.1">
-
-                        <Ellipse.Effect>
-                            <DropShadowEffect />
-                        </Ellipse.Effect>
+                        Opacity="0.3">
                     </Ellipse>
                     
                     <!--Blur-->
@@ -42,7 +38,19 @@
                         </Ellipse.Effect>
                     </Ellipse>
 
-                    <Label Content="{Binding ColorString}" />
+                    <TextBox
+                        Width="{Binding Size}"
+                        Height="{Binding Size}"
+                        Text="{Binding ColorValue, Mode=OneWay}"
+                        TextAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Visibility="{Binding ShowColorValue}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        FontSize="6"
+                        IsReadOnly="True"
+                        Background="Transparent"
+                        BorderThickness="0"/>
                 </Grid>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

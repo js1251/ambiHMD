@@ -1,70 +1,31 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Ui.Annotations;
 
 namespace Ui.customcontrols {
     public partial class HMDPreview : UserControl, INotifyPropertyChanged {
-        // Resharper disable once InconsistentNaming
-        private static readonly DependencyProperty _brushProperty =
-            DependencyProperty.Register(nameof(PreviewBrush),
-                typeof(Brush),
-                typeof(HMDPreview),
-                new PropertyMetadata(Brushes.WhiteSmoke));
-
-        public Brush PreviewBrush {
-            get => (Brush)GetValue(_brushProperty);
-            set {
-                SetValue(_brushProperty, value);
-                SetLedCount();
-            }
-        }
-
-        // Resharper disable once InconsistentNaming
-        private static readonly DependencyProperty _ledPerEyeProperty =
-            DependencyProperty.Register(nameof(LedPerEye),
-                typeof(int),
-                typeof(HMDPreview),
-                new PropertyMetadata(6));
+        public Brush PreviewBrush { get; set; } // TODO: to dependency property?
 
         public int LedPerEye {
-            get => (int)GetValue(_ledPerEyeProperty);
-            set {
-                SetValue(_ledPerEyeProperty, value);
-                SetLedCount();
-            }
+            set => SetLedCount(value);
         }
-
-        // Resharper disable once InconsistentNaming
-        private static readonly DependencyProperty _blurProperty =
-            DependencyProperty.Register(nameof(BlurPercentage),
-                typeof(float),
-                typeof(HMDPreview),
-                new PropertyMetadata(0f));
 
         public float BlurPercentage {
-            get => (float)GetValue(_blurProperty);
-            set {
-                SetValue(_blurProperty, value);
-                SetLedBlur();
-            }
+            set => SetLedBlur(value);
         }
 
-        // Resharper disable once InconsistentNaming
-        private static readonly DependencyProperty _ledSizeProperty =
-            DependencyProperty.Register(nameof(LedSize),
-                typeof(float),
-                typeof(HMDPreview),
-                new PropertyMetadata(25f));
-
         public float LedSize {
-            get => (float)GetValue(_ledSizeProperty);
-            set {
-                SetValue(_ledSizeProperty, value);
-                SetLedSize();
-            }
+            set => SetLedSize(value);
+        }
+
+        public bool LedActive {
+            set => SetLedActive(value);
+        }
+
+        public bool ShowColorValue {
+            set => SetLedShowColorvalue(value);
         }
 
         public HMDPreview() {
@@ -72,35 +33,50 @@ namespace Ui.customcontrols {
         }
 
         public void SetLedColor(int index, Color color) {
-            if (index > LedPerEye - 1) {
-                RightLEDs.SetColor(index - LedPerEye, color);
+            var ledCount = LeftLEDs.Leds.Count;
+
+            if (index > ledCount - 1) {
+                RightLEDs.SetColor(index - ledCount, color);
             } else {
-                LeftLEDs.SetColor(index - LedPerEye, color);
+                LeftLEDs.SetColor(index, color);
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void SetLedCount() {
-            LeftLEDs.Amount = LedPerEye;
-            RightLEDs.Amount = LedPerEye;
+        private void SetLedCount(int count) {
+            LeftLEDs.Amount = count;
+            RightLEDs.Amount = count;
         }
 
-        private void SetLedBlur() {
-            var maxBlurSize = LedSize * 2f;
+        private void SetLedBlur(float blurPercentage) {
+            var ledSize = LeftLEDs.Size;
+
+            var maxBlurSize = ledSize * 2f;
             // TODO: make depending on amount of leds too
 
-            LeftLEDs.BlurRadius = maxBlurSize * BlurPercentage;
-            RightLEDs.BlurRadius = maxBlurSize * BlurPercentage;
+            LeftLEDs.BlurRadius = maxBlurSize * blurPercentage;
+            RightLEDs.BlurRadius = maxBlurSize * blurPercentage;
         }
 
-        private void SetLedSize() {
-            LeftLEDs.Size = LedSize;
-            RightLEDs.Size = LedSize;
+        private void SetLedSize(float size) {
+            LeftLEDs.Size = size;
+            RightLEDs.Size = size;
+        }
+
+        private void SetLedActive(bool isActive) {
+            LeftLEDs.IsActive = isActive;
+            RightLEDs.IsActive = isActive;
+        }
+
+        private void SetLedShowColorvalue(bool showColorvalue) {
+            LeftLEDs.ShowColorValue = showColorvalue;
+            RightLEDs.ShowColorValue = showColorvalue;
         }
     }
 }

@@ -59,7 +59,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="customcontrols\LEDModel.cs" />
-    <Compile Include="customcontrols\LedPreview.xaml.cs" />
     <Compile Include="customcontrols\HMDPreview.xaml.cs">
       <DependentUpon>HMDPreview.xaml</DependentUpon>
     </Compile>
@@ -69,10 +68,6 @@
     <Compile Include="MonitorEnumerationHelper.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="WindowEnumerationHelper.cs" />
-    <Page Include="customcontrols\LedPreview.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="customcontrols\HMDPreview.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

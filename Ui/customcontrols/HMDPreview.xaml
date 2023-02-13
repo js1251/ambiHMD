@@ -33,6 +33,6 @@
 
         <customcontrols:LEDStack
             x:Name="RightLEDs"
-            Grid.Column="0" />
+            Grid.Column="2" />
     </Grid>
 </UserControl>
