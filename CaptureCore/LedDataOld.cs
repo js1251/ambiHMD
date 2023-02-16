@@ -1,12 +1,12 @@
-﻿namespace FrameProcessing {
-    public class LedData {
+﻿namespace CaptureCore {
+    public class LedDataOld {
         private readonly byte[] _data;
         private readonly int _numberOfLeds;
         private readonly int _stride;
 
         public byte[] UnPadded { get; }
 
-        public LedData(byte[] data, int numberOfLeds, int stride) {
+        public LedDataOld(byte[] data, int numberOfLeds, int stride) {
             _data = data;
             _numberOfLeds = numberOfLeds;
             _stride = stride;
@@ -15,7 +15,7 @@
         }
 
         private byte[] GetUnpadded() {
-            var unpadded = new byte[_numberOfLeds * 4]; // RGBA
+            var unpadded = new byte[_numberOfLeds * _stride]; // RGBA
 
             var unpaddedIndex = 0;
             for (var i = 0; i < _numberOfLeds; i += _stride) {

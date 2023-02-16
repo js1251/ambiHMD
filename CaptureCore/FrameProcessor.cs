@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using Composition.WindowsRuntimeHelpers;
+﻿using System;
+using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 
 namespace CaptureCore {
@@ -15,72 +15,149 @@ namespace CaptureCore {
             }
         }
 
-        private readonly Device _d3dDevice;
-        private readonly ComputeShader _computeShader;
-        private Buffer _workBuffer;
-        private UnorderedAccessView _workBufferUav;
-        private Buffer _stagingBuffer;
-        private int _numberOfLedsPerEye;
+        // TODO: set externally
+        public float SampleWidth {
+            get => _sampleWidth;
+            set {
+                _sampleWidth = value;
+                InitializeBuffers();
+            }
+        }
 
-        public FrameProcessor(ComputeShaderCompileHelper computeshader, Device d3dDevice, int numberOfLedsPerEye) {
-            _computeShader = computeshader.CreateWithDevice(d3dDevice);
+        // TODO: set externally
+        public float SampleHeight {
+            get => _sampleHeight;
+            set {
+                _sampleHeight = value;
+                InitializeBuffers();
+            }
+        }
+
+        #region Backing Fields
+
+        private int _numberOfLedsPerEye;
+        private int _frameWidth;
+        private int _frameHeight;
+        private float _sampleWidth;
+        private float _sampleHeight;
+
+        #endregion Backing Fields
+
+        private readonly Device _d3dDevice;
+        
+        private ResourceRegion _sourceRegion;
+        private Resource _workBuffer;
+        private Resource _stagingBuffer;
+
+        private float _xRightStart;
+        private float _yStep;
+        private int _maxWorkMipLevel;
+
+        public FrameProcessor(Device d3dDevice, int numberOfLedsPerEye) {
             _d3dDevice = d3dDevice;
             _numberOfLedsPerEye = numberOfLedsPerEye;
+        }
+
+        public void SetFrameSize(int width, int height) {
+            _frameWidth = width;
+            _frameHeight = height;
 
             InitializeBuffers();
         }
 
         public LedData ProcessFrame(Texture2D frame) {
-            // set the shader
-            _d3dDevice.ImmediateContext.ComputeShader.Set(_computeShader);
+            var ledData = new LedData(NumberOfLedsPerEye * NUMBER_OF_EYES, DATA_STRIDE);
 
-            var srv = new ShaderResourceView(_d3dDevice, frame);
+            for (var y = 0; y < NumberOfLedsPerEye; y++) {
+                for (var x = 0; x < NUMBER_OF_EYES; x++) {
+                    var xStart = (int)Math.Floor(x > 0 ? _xRightStart : 0);
+                    var yStart = (int)Math.Floor(y * _yStep);
 
-            _d3dDevice.ImmediateContext.ComputeShader.SetShaderResource(0, srv);
-            _d3dDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, _workBufferUav);
+                    // copy part of frame into workBuffer
+                    _d3dDevice.ImmediateContext.CopySubresourceRegion(frame, 0, _sourceRegion, _workBuffer, 0, xStart, yStart);
 
-            // send it off to run
-            _d3dDevice.ImmediateContext.Dispatch(NUMBER_OF_EYES, NumberOfLedsPerEye, 1);
+                    // create mipmap for workBuffer
+                    var srv = new ShaderResourceView(_d3dDevice, _workBuffer);
+                    _d3dDevice.ImmediateContext.GenerateMips(srv);
 
-            // copy the results into staging resource
-            _d3dDevice.ImmediateContext.CopyResource(_workBuffer, _stagingBuffer);
+                    // get the index to the smallest mip
+                    // visual reference: https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-subresources
+                    var subresourceIndex = Resource.CalculateSubResourceIndex(_maxWorkMipLevel - 1, 0, _maxWorkMipLevel);
 
-            // get access to the staging resource on CPU
-            var mapSource = _d3dDevice.ImmediateContext.MapSubresource(_stagingBuffer, 0, MapMode.Read, MapFlags.None);
+                    // copy smallest mip of workBuffer into stagingBuffer
+                    _d3dDevice.ImmediateContext.CopySubresourceRegion(_workBuffer, subresourceIndex, null, _stagingBuffer, 0);
+                    
+                    // get access to the staging buffer on CPU
+                    var mapSource = _d3dDevice.ImmediateContext.MapSubresource(_stagingBuffer, 0, MapMode.Read, MapFlags.None);
 
-            // copy the data into a managed array
-            var data = new byte[mapSource.RowPitch]; // TODO: why is this 128 and not 48?
-            Marshal.Copy(mapSource.DataPointer, data, 0, data.Length);
+                    // copy the data into byte array
+                    var data = new byte[mapSource.RowPitch]; // TODO: what does RowPitch mean?
+                    Marshal.Copy(mapSource.DataPointer, data, 0, data.Length);
 
-            // unmap the staging resource
-            _d3dDevice.ImmediateContext.UnmapSubresource(_stagingBuffer, 0);
+                    // un-map the staging buffer
+                    _d3dDevice.ImmediateContext.UnmapSubresource(_stagingBuffer, 0);
 
-            return new LedData(data, NumberOfLedsPerEye * NUMBER_OF_EYES, DATA_STRIDE);
+                    // TODO: how big is data ? What format is it?
+                    ledData.SetData(y * NUMBER_OF_EYES + x, data);
+                }
+            }
+
+            return ledData;
         }
 
         private void InitializeBuffers() {
-            _workBuffer = new Buffer(_d3dDevice,
-                new BufferDescription(
-                    NumberOfLedsPerEye * NUMBER_OF_EYES * DATA_STRIDE,
-                    ResourceUsage.Default,
-                    BindFlags.ShaderResource | BindFlags.UnorderedAccess,
-                    CpuAccessFlags.None,
-                    ResourceOptionFlags.BufferStructured,
-                    DATA_STRIDE
-                )
-            );
+            // TODO: temporarily set SampleWidth and Height to hardcoded values
+            _sampleWidth = 0.1f; // 10% of the frame width
+            _sampleHeight = 1f / NumberOfLedsPerEye; // 1/NumberOfLedsPerEye of the frame height
+            // TODO: this will be more complicated once stencils can be bigger, since they could reach out of the frame
 
-            _workBufferUav = new UnorderedAccessView(_d3dDevice, _workBuffer);
+            _yStep = _frameHeight * _sampleHeight;
+            _xRightStart = _frameWidth - SampleWidth * _frameWidth;
 
-            _stagingBuffer = new Buffer(_d3dDevice,
-                new BufferDescription {
-                    SizeInBytes = NumberOfLedsPerEye * NUMBER_OF_EYES * DATA_STRIDE,
-                    CpuAccessFlags = CpuAccessFlags.Read,
+            var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
+            var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
+
+            _sourceRegion = new ResourceRegion {
+                Left = 0,
+                Top = 0,
+                Front = 0,
+                Right = stencilWidth,
+                Bottom = stencilHeight,
+                Back = 1
+            };
+
+            _maxWorkMipLevel = (int)Math.Ceiling(Math.Log(Math.Max(stencilWidth, stencilHeight), 2));
+
+            // Buffer that will hold a sub-region of the full frame
+            _workBuffer = new Texture2D(_d3dDevice,
+                new Texture2DDescription {
+                    Width = (int)(SampleWidth * _frameWidth),
+                    Height = (int)(SampleHeight * _frameHeight),
+                    MipLevels = _maxWorkMipLevel, // amount of mip levels required to produce a 1x1 pixel texture
+                    ArraySize = 1, // only one texture used
+                    Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource, // required by GenerateMips
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.GenerateMipMaps // required by GenerateMips
+                });
+
+            // staging buffer that will hold the smallest mip of the workbuffer
+            _stagingBuffer = new Texture2D(_d3dDevice,
+                new Texture2DDescription {
+                    Width = 1,
+                    Height = 1,
+                    MipLevels = 0,
+                    ArraySize = 1,
+                    Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                    SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
                     Usage = ResourceUsage.Staging,
                     BindFlags = BindFlags.None,
-                    OptionFlags = ResourceOptionFlags.None,
-                    StructureByteStride = DATA_STRIDE
+                    CpuAccessFlags = CpuAccessFlags.Read,
+                    OptionFlags = ResourceOptionFlags.None
                 });
+
         }
     }
 }

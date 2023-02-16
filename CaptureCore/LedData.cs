@@ -1,41 +1,43 @@
-﻿namespace CaptureCore {
+﻿using System;
+
+namespace CaptureCore {
     public class LedData {
-        private readonly byte[] _data;
-        private readonly int _numberOfLeds;
         private readonly int _stride;
+        private readonly int _numberOfLeds;
 
-        public byte[] UnPadded { get; }
+        public byte[] Data { get; }
 
-        public LedData(byte[] data, int numberOfLeds, int stride) {
-            _data = data;
+        public LedData(int numberOfLeds, int stride) {
             _numberOfLeds = numberOfLeds;
             _stride = stride;
 
-            UnPadded = GetUnpadded();
+            Data = new byte[numberOfLeds * stride];
         }
 
-        private byte[] GetUnpadded() {
-            var unpadded = new byte[_numberOfLeds * _stride]; // RGBA
-
-            var unpaddedIndex = 0;
-            for (var i = 0; i < _numberOfLeds; i += _stride) {
-                unpadded[unpaddedIndex++] = _data[i];
-                unpadded[unpaddedIndex++] = _data[i + 1];
-                unpadded[unpaddedIndex++] = _data[i + 2];
-                unpadded[unpaddedIndex++] = _data[i + 3];
+        public void SetData(int index, byte[] data) {
+            if (index >= _numberOfLeds || index < 0) {
+                throw new ArgumentOutOfRangeException(nameof(index),
+                    "index must be above 0 and less than number of leds");
             }
 
-            return unpadded;
+            if (data.Length != _stride) {
+                throw new ArgumentException("data length must be equal to stride", nameof(data));
+            }
+
+            var dataOffset = index * _stride;
+            for (var i = 0; i < _stride; i++) {
+                Data[dataOffset + i] = data[i];
+            }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="ledIndex">a, r, g, b</param>
-        /// <returns></returns>
-        public (byte, byte, byte, byte) GetColor(int ledIndex) {
-            var index = ledIndex * FrameProcessor.DATA_STRIDE;
-            return (_data[index + 0], _data[index + 1], _data[index + 2], _data[index + 3]);
+        public byte[] GetData(int index) {
+            var offset = index * _stride;
+            var data = new byte[_stride];
+            for (var i = 0; i < _stride; i++) {
+                data[i] = Data[offset + i];
+            }
+
+            return data;
         }
     }
 }

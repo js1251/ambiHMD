@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
@@ -10,7 +9,7 @@ using SharpDX.Direct3D11;
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
 
-        public delegate void ColorChangedArg(CaptureApplication sender, int index, (byte, byte, byte, byte) colorData);
+        public delegate void ColorChangedArg(CaptureApplication sender, int index, byte[] colorData);
 
         public event ColorChangedArg ColorChanged;
         public int NumberOfLedsPerEye {
@@ -32,7 +31,6 @@ namespace CaptureCore {
         private readonly IDirect3DDevice _device;
         private WindowCapture _capture;
         
-        private readonly ComputeShaderCompileHelper _ledShader;
         private FrameProcessor _frameProcessor;
         private int _numberOfLedPerEye;
 
@@ -61,8 +59,6 @@ namespace CaptureCore {
             _content.Brush = _brush;
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
-
-            _ledShader = new ComputeShaderCompileHelper(new FileInfo("example.hlsl"));
         }
 
         public Visual Visual => _root;
@@ -85,9 +81,10 @@ namespace CaptureCore {
 
             _capture.StartCapture();
 
-            _frameProcessor = new FrameProcessor(_ledShader, _capture.D3dDevice, NumberOfLedsPerEye);
+            _frameProcessor = new FrameProcessor(_capture.D3dDevice, NumberOfLedsPerEye);
 
             _capture.TextureChanged += UpdateLedValues;
+            _capture.TextureSizeChanged += UpdateFrameSize;
         }
 
         public void StopCapture() {
@@ -101,9 +98,13 @@ namespace CaptureCore {
             var ledAmount = NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES;
 
             for (var i = 0; i < ledAmount; i++) {
-                var colorData = ledData.GetColor(i);
+                var colorData = ledData.GetData(i);
                 ColorChanged?.Invoke(this, i, colorData);
             }
+        }
+
+        private void UpdateFrameSize(object sender, (int, int) size) {
+            _frameProcessor.SetFrameSize(size.Item1, size.Item2);
         }
     }
 }

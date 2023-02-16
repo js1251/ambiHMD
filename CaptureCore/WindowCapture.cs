@@ -12,6 +12,7 @@ namespace CaptureCore {
     public sealed class WindowCapture : IDisposable {
         public SharpDX.Direct3D11.Device D3dDevice { get; }
         public event EventHandler<Texture2D> TextureChanged;
+        public event EventHandler<(int, int)> TextureSizeChanged;
 
         private readonly GraphicsCaptureItem _item;
         private readonly Direct3D11CaptureFramePool _framePool;
@@ -49,7 +50,7 @@ namespace CaptureCore {
             _framePool =
                 Direct3D11CaptureFramePool.Create(_device, DirectXPixelFormat.B8G8R8A8UIntNormalized, 2, i.Size);
             _session = _framePool.CreateCaptureSession(i);
-            _lastSize = i.Size;
+            //_lastSize = i.Size;
 
             _framePool.FrameArrived += OnFrameArrived;
         }
@@ -79,6 +80,8 @@ namespace CaptureCore {
                     // After we do that, retire the frame and then recreate the frame pool.
                     newSize = true;
                     _lastSize = frame.ContentSize;
+                    TextureSizeChanged?.Invoke(this, (_lastSize.Width, _lastSize.Height));
+                    
                     _swapChain.ResizeBuffers(2,
                         _lastSize.Width,
                         _lastSize.Height,

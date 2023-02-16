@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "FrameProcessing": {
-      "commandName": "Project",
-      "nativeDebugging": true
-    }
-  }
-}
