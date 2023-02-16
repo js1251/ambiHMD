@@ -6,53 +6,138 @@
              mc:Ignorable="d"
              x:Name="Control">
 
-    <ItemsControl
-        ItemsSource="{Binding ElementName=Control, Path=Leds}">
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <StackPanel
-                    Orientation="Vertical"
-                    IsItemsHost="True" />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <Grid>
-                    <!--Solid-->
-                    <Ellipse
-                        Width="{Binding Size}"
-                        Height="{Binding Size}"
-                        Fill="{Binding Brush}"
-                        Opacity="0.3">
-                    </Ellipse>
-                    
-                    <!--Blur-->
-                    <Ellipse
-                        Width="{Binding Size}"
-                        Height="{Binding Size}"
-                        Fill="{Binding Brush}">
+    <Grid>
+        <!--<Ellipse
+            Width="25"
+            Height="25"
+            Fill="Orange"
+            Opacity="0.3">
+        </Ellipse>
 
-                        <Ellipse.Effect>
-                            <BlurEffect
-                                Radius="{Binding BlurRadius}" />
-                        </Ellipse.Effect>
-                    </Ellipse>
+        <Ellipse
+            Width="25"
+            Height="25"
+            Fill="Orange">
 
-                    <TextBox
-                        Width="{Binding Size}"
-                        Height="{Binding Size}"
-                        Text="{Binding ColorValue, Mode=OneWay}"
-                        TextAlignment="Center"
-                        VerticalContentAlignment="Center"
-                        Visibility="{Binding ShowColorValue}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        FontSize="6"
-                        IsReadOnly="True"
-                        Background="Transparent"
-                        BorderThickness="0"/>
-                </Grid>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+            <Ellipse.Effect>
+                <BlurEffect
+                    Radius="50" />
+            </Ellipse.Effect>
+        </Ellipse>
+
+        <TextBox
+            Width="25"
+            Height="25"
+            Text="123"
+            TextAlignment="Center"
+            VerticalContentAlignment="Center"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            FontSize="6"
+            IsReadOnly="True"
+            Background="Transparent"
+            BorderThickness="0" />
+
+        <Rectangle
+            Height="240"
+            Width="256"
+            Margin="0, 0, -306, 0"
+            Fill="Transparent"
+            Stroke="Red"
+            StrokeThickness="1"
+            Opacity="0.5">
+
+            <Rectangle.Clip>
+                <RectangleGeometry>
+                    <RectangleGeometry.Rect>
+                        <Rect
+                            X="2"
+                            Y="0"
+                            Width="256"
+                            Height="240"/>
+                    </RectangleGeometry.Rect>
+                </RectangleGeometry>
+            </Rectangle.Clip>
+        </Rectangle>
+
+        <Line
+            X1="15"
+            Y1="115"
+            X2="54"
+            Y2="0.5"
+            Stroke="Red"
+            StrokeThickness="1"
+            Opacity="0.5"
+        />
+
+        <Line
+            X1="15"
+            Y1="115"
+            X2="15"
+            Y2="125"
+            Stroke="Red"
+            StrokeThickness="1"
+            Opacity="0.5"
+        />
+
+        <Line
+            X1="15"
+            Y1="125"
+            X2="54"
+            Y2="239.5"
+            Stroke="Red"
+            StrokeThickness="1"
+            Opacity="0.5"
+            />-->
+
+        <ItemsControl
+            ItemsSource="{Binding ElementName=Control, Path=Leds}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel
+                        Orientation="Vertical"
+                        IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <!--Solid-->
+                        <Ellipse
+                            Width="{Binding Size}"
+                            Height="{Binding Size}"
+                            Fill="{Binding Brush}"
+                            Opacity="0.3">
+                        </Ellipse>
+
+                        <!--Blur-->
+                        <Ellipse
+                            Width="{Binding Size}"
+                            Height="{Binding Size}"
+                            Fill="{Binding Brush}">
+
+                            <Ellipse.Effect>
+                                <BlurEffect
+                                    Radius="{Binding BlurRadius}" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <TextBox
+                            Width="{Binding Size}"
+                            Height="{Binding Size}"
+                            Text="{Binding ColorValue, Mode=OneWay}"
+                            TextAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Visibility="{Binding ShowColorValue}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            FontSize="6"
+                            IsReadOnly="True"
+                            Background="Transparent"
+                            BorderThickness="0" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
 </UserControl>

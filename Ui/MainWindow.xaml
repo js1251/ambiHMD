@@ -29,13 +29,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:customcontrols="clr-namespace:Ui.customcontrols"
         mc:Ignorable="d"
-        Title="ambiHMD" Height="450" Width="800"
+        Title="ambiHMD" Height="500" Width="850"
         Loaded="Window_Loaded"
         x:Name="Root">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <Grid x:Name="ControlsGrid" Grid.Column="0">
@@ -152,6 +152,13 @@
                             </Grid>
                         </StackPanel>
 
+                        <!--Show LED Sample Areas checkbox-->
+                        <CheckBox
+                            Content="Show Sample Areas"
+                            Margin="10"
+                            Checked="SampleAreas_OnToggled"
+                            Unchecked="SampleAreas_OnToggled" />
+
                         <StackPanel>
                             <Label Content="LED Preview BlurPercentage" />
                             <Grid>
@@ -181,8 +188,7 @@
                             Content="Show LED values"
                             Margin="10"
                             Checked="LedValues_OnToggled"
-                            Unchecked="LedValues_OnToggled"/>
-
+                            Unchecked="LedValues_OnToggled" />
                     </StackPanel>
                 </Grid>
 
@@ -190,8 +196,12 @@
             <Button x:Name="StopButton" Grid.Row="1" Content="Stop Capturing" Click="StopButton_Click" Margin="10" />
         </Grid>
 
-        <Grid Grid.Column="1">
+        <Grid
+            Grid.Column="1"
+            Background="Black"
+            Opacity="0.85">
             <customcontrols:HMDPreview
+                Margin="25, 0, 25, 0"
                 Height="400"
                 LedSize="35"
                 x:Name="HMDPreview" />

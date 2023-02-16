@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
+using WaveEngine.Bindings.RenderDoc;
 
 namespace CaptureCore {
     public sealed class FrameProcessor {
@@ -45,7 +46,6 @@ namespace CaptureCore {
 
         private readonly Device _d3dDevice;
         
-        private ResourceRegion _sourceRegion;
         private Resource _workBuffer;
         private Resource _stagingBuffer;
 
@@ -53,9 +53,13 @@ namespace CaptureCore {
         private float _yStep;
         private int _maxWorkMipLevel;
 
+        private readonly RenderDoc _renderDoc;
+
         public FrameProcessor(Device d3dDevice, int numberOfLedsPerEye) {
             _d3dDevice = d3dDevice;
             _numberOfLedsPerEye = numberOfLedsPerEye;
+
+            RenderDoc.Load(out _renderDoc);
         }
 
         public void SetFrameSize(int width, int height) {
@@ -73,8 +77,21 @@ namespace CaptureCore {
                     var xStart = (int)Math.Floor(x > 0 ? _xRightStart : 0);
                     var yStart = (int)Math.Floor(y * _yStep);
 
+                    _renderDoc?.API.StartFrameCapture(IntPtr.Zero, IntPtr.Zero);
+
+                    var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
+                    var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
+                    var sourceRegion = new ResourceRegion {
+                        Left = xStart,
+                        Top = yStart,
+                        Front = 0,
+                        Right = xStart + stencilWidth,
+                        Bottom = yStart + stencilHeight,
+                        Back = 1
+                    };
+
                     // copy part of frame into workBuffer
-                    _d3dDevice.ImmediateContext.CopySubresourceRegion(frame, 0, _sourceRegion, _workBuffer, 0, xStart, yStart);
+                    _d3dDevice.ImmediateContext.CopySubresourceRegion(frame, 0, sourceRegion, _workBuffer, 0);
 
                     // create mipmap for workBuffer
                     var srv = new ShaderResourceView(_d3dDevice, _workBuffer);
@@ -97,6 +114,11 @@ namespace CaptureCore {
                     // un-map the staging buffer
                     _d3dDevice.ImmediateContext.UnmapSubresource(_stagingBuffer, 0);
 
+                    // release resources
+                    srv.Dispose();
+
+                    _renderDoc?.API.EndFrameCapture(IntPtr.Zero, IntPtr.Zero);
+
                     // TODO: how big is data ? What format is it?
                     ledData.SetData(y * NUMBER_OF_EYES + x, data);
                 }
@@ -117,16 +139,7 @@ namespace CaptureCore {
             var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
             var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
 
-            _sourceRegion = new ResourceRegion {
-                Left = 0,
-                Top = 0,
-                Front = 0,
-                Right = stencilWidth,
-                Bottom = stencilHeight,
-                Back = 1
-            };
-
-            _maxWorkMipLevel = (int)Math.Ceiling(Math.Log(Math.Max(stencilWidth, stencilHeight), 2));
+            _maxWorkMipLevel = (int)Math.Ceiling(Math.Log(Math.Max(stencilWidth, stencilHeight), 2)) + 1;
 
             // Buffer that will hold a sub-region of the full frame
             _workBuffer = new Texture2D(_d3dDevice,
@@ -135,7 +148,7 @@ namespace CaptureCore {
                     Height = (int)(SampleHeight * _frameHeight),
                     MipLevels = _maxWorkMipLevel, // amount of mip levels required to produce a 1x1 pixel texture
                     ArraySize = 1, // only one texture used
-                    Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm, // same as frame
                     SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource, // required by GenerateMips
@@ -150,7 +163,7 @@ namespace CaptureCore {
                     Height = 1,
                     MipLevels = 0,
                     ArraySize = 1,
-                    Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
                     SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
                     Usage = ResourceUsage.Staging,
                     BindFlags = BindFlags.None,

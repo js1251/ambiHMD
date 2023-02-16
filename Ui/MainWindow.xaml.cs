@@ -96,8 +96,9 @@ namespace Ui {
                 if (index < 0 || index >= LedsPerEye * 2f) {
                     return;
                 }
-                
-                HMDPreview.SetLedColor(index, Color.FromArgb(colorData[0], colorData[1], colorData[2], colorData[3]));
+
+                // BGRA
+                HMDPreview.SetLedColor(index, Color.FromArgb(colorData[3], colorData[2], colorData[1], colorData[0]));
             };
         }
 
@@ -121,8 +122,7 @@ namespace Ui {
             var hwnd = process.MainWindowHandle;
             try {
                 StartHwndCapture(hwnd);
-            }
-            catch (Exception) {
+            } catch(Exception) {
                 Debug.WriteLine($"Hwnd 0x{hwnd.ToInt32():X8} is not valid for capture!");
                 _processes.Remove(process);
                 comboBox.SelectedIndex = -1;
@@ -149,8 +149,7 @@ namespace Ui {
             var hmon = monitor.Hmon;
             try {
                 StartHmonCapture(hmon);
-            }
-            catch (Exception) {
+            } catch(Exception) {
                 Debug.WriteLine($"Hmon 0x{hmon.ToInt32():X8} is not valid for capture!");
                 _monitors.Remove(monitor);
                 comboBox.SelectedIndex = -1;
@@ -164,6 +163,10 @@ namespace Ui {
 
         private void LedValues_OnToggled(object sender, RoutedEventArgs e) {
             HMDPreview.ShowColorValue = ((CheckBox)sender).IsChecked.Value;
+        }
+
+        private void SampleAreas_OnToggled(object sender, RoutedEventArgs e) {
+            HMDPreview.ShowSampleAreas = ((CheckBox)sender).IsChecked.Value;
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e) {
@@ -182,8 +185,7 @@ namespace Ui {
                     select p;
                 _processes = new ObservableCollection<Process>(processesWithWindows);
                 WindowComboBox.ItemsSource = _processes;
-            }
-            else {
+            } else {
                 WindowComboBox.IsEnabled = false;
             }
         }
@@ -192,8 +194,7 @@ namespace Ui {
             if (ApiInformation.IsApiContractPresent(typeof(Windows.Foundation.UniversalApiContract).FullName, 8)) {
                 _monitors = new ObservableCollection<MonitorInfo>(MonitorEnumerationHelper.GetMonitors());
                 MonitorComboBox.ItemsSource = _monitors;
-            }
-            else {
+            } else {
                 MonitorComboBox.IsEnabled = false;
                 //PrimaryMonitorButton.IsEnabled = false;
             }

@@ -28,17 +28,23 @@ namespace Ui.customcontrols {
             set => SetLedShowColorvalue(value);
         }
 
+        public bool ShowSampleAreas {
+            set => SetSampleAreas(value);
+        }
+
         public HMDPreview() {
             InitializeComponent();
         }
 
         public void SetLedColor(int index, Color color) {
-            var ledCount = LeftLEDs.Leds.Count;
-
-            if (index > ledCount - 1) {
-                RightLEDs.SetColor(index - ledCount, color);
-            } else {
+            if (index % 2 == 0) {
+                // left eye
+                index /= 2;
                 LeftLEDs.SetColor(index, color);
+            } else {
+                // right eye
+                index = (index - 1) / 2;
+                RightLEDs.SetColor(index, color);
             }
         }
 
@@ -77,6 +83,10 @@ namespace Ui.customcontrols {
         private void SetLedShowColorvalue(bool showColorvalue) {
             LeftLEDs.ShowColorValue = showColorvalue;
             RightLEDs.ShowColorValue = showColorvalue;
+        }
+
+        private void SetSampleAreas(bool showSampleAreas) {
+            // TODO: implement
         }
     }
 }

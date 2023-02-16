@@ -20,10 +20,6 @@ namespace CaptureCore {
                     "index must be above 0 and less than number of leds");
             }
 
-            if (data.Length != _stride) {
-                throw new ArgumentException("data length must be equal to stride", nameof(data));
-            }
-
             var dataOffset = index * _stride;
             for (var i = 0; i < _stride; i++) {
                 Data[dataOffset + i] = data[i];
