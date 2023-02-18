@@ -26,7 +26,7 @@ namespace CaptureCore {
         private readonly ContainerVisual _root;
 
         private readonly SpriteVisual _content;
-        private readonly CompositionSurfaceBrush _brush;
+        public CompositionSurfaceBrush Brush { get; private set; }
 
         private readonly IDirect3DDevice _device;
         private WindowCapture _capture;
@@ -43,20 +43,20 @@ namespace CaptureCore {
             _root.RelativeSizeAdjustment = Vector2.One;
 
             // Setup the content.
-            _brush = _compositor.CreateSurfaceBrush();
-            _brush.HorizontalAlignmentRatio = 0.5f;
-            _brush.VerticalAlignmentRatio = 0.5f;
-            _brush.Stretch = CompositionStretch.Uniform;
+            Brush = _compositor.CreateSurfaceBrush();
+            Brush.HorizontalAlignmentRatio = 0.5f;
+            Brush.VerticalAlignmentRatio = 0.5f;
+            Brush.Stretch = CompositionStretch.Uniform;
 
             var shadow = _compositor.CreateDropShadow();
-            shadow.Mask = _brush;
+            shadow.Mask = Brush;
 
             _content = _compositor.CreateSpriteVisual();
             _content.AnchorPoint = new Vector2(0.5f, 0.5f);
             _content.RelativeOffsetAdjustment = new Vector3(0.5f, 0.5f, 0);
             _content.RelativeSizeAdjustment = Vector2.One;
-            _content.Size = new Vector2(-80, -80);
-            _content.Brush = _brush;
+            //_content.Size = new Vector2(-80, -80);
+            _content.Brush = Brush;
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
         }
@@ -68,7 +68,7 @@ namespace CaptureCore {
             _compositor = null;
             _root.Dispose();
             _content.Dispose();
-            _brush.Dispose();
+            Brush.Dispose();
             _device.Dispose();
         }
 
@@ -77,7 +77,7 @@ namespace CaptureCore {
             _capture = new WindowCapture(_device, item);
 
             var surface = _capture.CreateSurface(_compositor);
-            _brush.Surface = surface;
+            Brush.Surface = surface;
 
             _capture.StartCapture();
 
@@ -89,7 +89,7 @@ namespace CaptureCore {
 
         public void StopCapture() {
             _capture?.Dispose();
-            _brush.Surface = null;
+            Brush.Surface = null;
             _frameProcessor = null;
         }
 

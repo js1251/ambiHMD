@@ -4,9 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:customcontrols="clr-namespace:Ui.customcontrols"
-             mc:Ignorable="d"
-             x:Name="Control"
-             d:DesignHeight="300" d:DesignWidth="600">
+             mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -15,24 +13,21 @@
         </Grid.ColumnDefinitions>
 
         <Rectangle
+            x:Name="PreviewPlaceholder"
             Grid.Column="1"
-            Fill="{Binding ElementName=Control, Path=PreviewBrush}">
-            <Rectangle.Effect>
-                <DropShadowEffect
-                    BlurRadius="10"
-                    Color="Black"
-                    Direction="0"
-                    ShadowDepth="0"
-                    Opacity="0.5" />
-            </Rectangle.Effect>
+            Stroke="Red">
         </Rectangle>
 
         <customcontrols:LEDStack
             x:Name="LeftLEDs"
-            Grid.Column="0" />
+            Margin="20, 0, 20, 0"
+            Grid.Column="0"
+            HorizontalAlignment="Right"/>
 
         <customcontrols:LEDStack
             x:Name="RightLEDs"
-            Grid.Column="2" />
+            Margin="20, 0, 20, 0"
+            Grid.Column="2"
+            HorizontalAlignment="Left" />
     </Grid>
 </UserControl>
