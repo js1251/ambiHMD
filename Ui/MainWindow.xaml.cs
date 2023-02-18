@@ -20,7 +20,7 @@ namespace Ui {
                 OnPropertyChanged();
             }
         }
-        
+
         private ObservableCollection<Process> _processes;
         private ObservableCollection<MonitorInfo> _monitors;
         private int _ledsPerEye;
@@ -44,9 +44,17 @@ namespace Ui {
 
         private async void PickerButton_Click(object sender, RoutedEventArgs e) {
             HMDPreview.StopCapture();
+
             WindowComboBox.SelectedIndex = -1;
+            WindowComboPlaceholder.Visibility = Visibility.Visible;
+
             MonitorComboBox.SelectedIndex = -1;
-            await HMDPreview.StartPickerCaptureAsync();
+            MonitorComboPlaceholder.Visibility = Visibility.Visible;
+
+            var item = await HMDPreview.StartPickerCaptureAsync();
+            SetWindowTitle(item.DisplayName);
+
+            // TODO: show display name or process name in comboboxes
         }
 
         private void WindowComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
@@ -58,14 +66,22 @@ namespace Ui {
             }
 
             HMDPreview.StopCapture();
-            MonitorComboBox.SelectedIndex = -1;
             var hwnd = process.MainWindowHandle;
             try {
                 HMDPreview.StartHwndCapture(hwnd);
+                WindowComboPlaceholder.Visibility = Visibility.Hidden;
+
+                MonitorComboBox.SelectedIndex = -1;
+                MonitorComboPlaceholder.Visibility = Visibility.Visible;
+
+                SetWindowTitle(process.MainWindowTitle);
             } catch(Exception) {
                 Debug.WriteLine($"Hwnd 0x{hwnd.ToInt32():X8} is not valid for capture!");
                 _processes.Remove(process);
                 comboBox.SelectedIndex = -1;
+                WindowComboPlaceholder.Visibility = Visibility.Visible;
+
+                SetWindowTitle();
             }
         }
 
@@ -78,14 +94,22 @@ namespace Ui {
             }
 
             HMDPreview.StopCapture();
-            WindowComboBox.SelectedIndex = -1;
             var hmon = monitor.Hmon;
             try {
                 HMDPreview.StartHmonCapture(hmon);
+                MonitorComboPlaceholder.Visibility = Visibility.Hidden;
+
+                WindowComboBox.SelectedIndex = -1;
+                WindowComboPlaceholder.Visibility = Visibility.Visible;
+
+                SetWindowTitle(monitor.DeviceName);
             } catch(Exception) {
                 Debug.WriteLine($"Hmon 0x{hmon.ToInt32():X8} is not valid for capture!");
                 _monitors.Remove(monitor);
                 comboBox.SelectedIndex = -1;
+                MonitorComboPlaceholder.Visibility = Visibility.Visible;
+
+                SetWindowTitle();
             }
         }
 
@@ -104,8 +128,14 @@ namespace Ui {
 
         private void StopButton_Click(object sender, RoutedEventArgs e) {
             HMDPreview.StopCapture();
+
             WindowComboBox.SelectedIndex = -1;
+            WindowComboPlaceholder.Visibility = Visibility.Visible;
+
             MonitorComboBox.SelectedIndex = -1;
+            MonitorComboPlaceholder.Visibility = Visibility.Visible;
+
+            SetWindowTitle();
         }
 
         private void Settings_OnToggle(object sender, RoutedEventArgs e) {
@@ -138,8 +168,11 @@ namespace Ui {
                 MonitorComboBox.ItemsSource = _monitors;
             } else {
                 MonitorComboBox.IsEnabled = false;
-                //PrimaryMonitorButton.IsEnabled = false;
             }
+        }
+
+        private void SetWindowTitle(string title = "") {
+            Title = "ambiHMD" + (string.IsNullOrEmpty(title) ? "" : " | " + title);
         }
 
         #endregion Capture Helpers

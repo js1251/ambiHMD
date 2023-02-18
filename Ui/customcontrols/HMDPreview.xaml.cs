@@ -115,7 +115,7 @@ namespace Ui.customcontrols {
             }
         }
 
-        public async Task StartPickerCaptureAsync() {
+        public async Task<GraphicsCaptureItem> StartPickerCaptureAsync() {
             var picker = new GraphicsCapturePicker();
             picker.SetWindow(_hwnd);
             var item = await picker.PickSingleItemAsync();
@@ -124,6 +124,8 @@ namespace Ui.customcontrols {
                 _captureApp.StartCaptureFromItem(item);
                 LedActive = true;
             }
+
+            return item;
         }
 
         public void StartHwndCapture(IntPtr hwnd) {

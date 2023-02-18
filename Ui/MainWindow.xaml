@@ -31,7 +31,7 @@
                                     Text="{TemplateBinding Content}"
                                     Foreground="{TemplateBinding Foreground}"
                                     FontSize="{TemplateBinding FontSize}" />
-                                
+
                                 <Rectangle
                                     Fill="White"
                                     Opacity="0.1" />
@@ -71,27 +71,58 @@
                         <Button x:Name="PickerButton" Content="Use Picker" Click="PickerButton_Click" Margin="10" />
 
                         <!--Window DropDown-->
-                        <ComboBox x:Name="WindowComboBox" Margin="10"
-                                  SelectionChanged="WindowComboBox_SelectionChanged">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding MainWindowTitle}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <Grid
+                            Margin="10">
+                            <ComboBox
+                                x:Name="WindowComboBox"
+                                SelectionChanged="WindowComboBox_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            MaxWidth="110"
+                                            TextTrimming="CharacterEllipsis"
+                                            Text="{Binding MainWindowTitle}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <TextBlock
+                                x:Name="WindowComboPlaceholder"
+                                IsHitTestVisible="False"
+                                VerticalAlignment="Center"
+                                Margin="5, 0, 0, 0"
+                                Text="Select Process ..."
+                                Opacity="0.6" />
+                        </Grid>
+
 
                         <!--<Button x:Name="PrimaryMonitorButton" Content="Use Primary Monitor" Click="PrimaryMonitorButton_Click"
                         Margin="10" />-->
 
                         <!--Monitor DropDown-->
-                        <ComboBox x:Name="MonitorComboBox" Margin="10"
-                                  SelectionChanged="MonitorComboBox_SelectionChanged">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding DeviceName}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                        <Grid
+                            Margin="10">
+                            <ComboBox
+                                x:Name="MonitorComboBox"
+                                SelectionChanged="MonitorComboBox_SelectionChanged">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            MaxWidth="110"
+                                            TextTrimming="CharacterEllipsis"
+                                            Text="{Binding DeviceName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            
+                            <TextBlock
+                                x:Name="MonitorComboPlaceholder"
+                                IsHitTestVisible="False"
+                                VerticalAlignment="Center"
+                                Margin="5, 0, 0, 0"
+                                Text="Select Display ..."
+                                Opacity="0.6" />
+                        </Grid>
                     </StackPanel>
                 </Grid>
 
@@ -207,11 +238,11 @@
                 </Grid>
 
             </StackPanel>
-            
+
             <Button
                 x:Name="StopButton"
                 Grid.Row="1"
-                Content="Stop Capturing"
+                Content="Stop Capture"
                 Click="StopButton_Click"
                 Margin="10" />
         </Grid>
