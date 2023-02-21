@@ -95,10 +95,6 @@
                                 Opacity="0.6" />
                         </Grid>
 
-
-                        <!--<Button x:Name="PrimaryMonitorButton" Content="Use Primary Monitor" Click="PrimaryMonitorButton_Click"
-                        Margin="10" />-->
-
                         <!--Monitor DropDown-->
                         <Grid
                             Margin="10">
@@ -150,6 +146,29 @@
                                 VerticalAlignment="Center"
                                 Text="{Binding ElementName=Root, Path=LedsPerEye, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
+
+                        <StackPanel>
+                            <Label Content="LED Brightness" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Label
+                                    Grid.Column="0"
+                                    Content="0%"
+                                    HorizontalAlignment="Left" />
+                                <Slider
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center" />
+                                <Label
+                                    Grid.Column="2"
+                                    Content="100%"
+                                    HorizontalAlignment="Right" />
+                            </Grid>
+                        </StackPanel>
 
                         <StackPanel>
                             <Label Content="Vertical Sweep" />
