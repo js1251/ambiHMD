@@ -52,7 +52,7 @@ namespace Ui {
             MonitorComboPlaceholder.Visibility = Visibility.Visible;
 
             var item = await HMDPreview.StartPickerCaptureAsync();
-            SetWindowTitle(item.DisplayName);
+            SetWindowTitle(item != null ? item.DisplayName : "");
 
             // TODO: show display name or process name in comboboxes
         }

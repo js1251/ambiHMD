@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 using WaveEngine.Bindings.RenderDoc;
@@ -45,13 +46,13 @@ namespace CaptureCore {
         #endregion Backing Fields
 
         private readonly Device _d3dDevice;
-        
+
         private Resource _workBuffer;
         private Resource _stagingBuffer;
+        private ShaderResourceView _srv;
 
         private float _xRightStart;
         private float _yStep;
-        private int _maxWorkMipLevel;
 
         private readonly RenderDoc _renderDoc;
 
@@ -77,7 +78,7 @@ namespace CaptureCore {
                     var xStart = (int)Math.Floor(x > 0 ? _xRightStart : 0);
                     var yStart = (int)Math.Floor(y * _yStep);
 
-                    _renderDoc?.API.StartFrameCapture(IntPtr.Zero, IntPtr.Zero);
+                    //_renderDoc?.API.StartFrameCapture(IntPtr.Zero, IntPtr.Zero);
 
                     var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
                     var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
@@ -94,30 +95,29 @@ namespace CaptureCore {
                     _d3dDevice.ImmediateContext.CopySubresourceRegion(frame, 0, sourceRegion, _workBuffer, 0);
 
                     // create mipmap for workBuffer
-                    var srv = new ShaderResourceView(_d3dDevice, _workBuffer);
-                    _d3dDevice.ImmediateContext.GenerateMips(srv);
+                    _d3dDevice.ImmediateContext.GenerateMips(_srv);
+
+                    // find out the biggest mip level from the workBuffer
+                    var maxMipLevels = _srv.Description.Texture2D.MipLevels;
 
                     // get the index to the smallest mip
                     // visual reference: https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-subresources
-                    var subresourceIndex = Resource.CalculateSubResourceIndex(_maxWorkMipLevel - 1, 0, _maxWorkMipLevel);
+                    var subresourceIndex = Resource.CalculateSubResourceIndex(maxMipLevels - 1, 0, maxMipLevels);
 
                     // copy smallest mip of workBuffer into stagingBuffer
                     _d3dDevice.ImmediateContext.CopySubresourceRegion(_workBuffer, subresourceIndex, null, _stagingBuffer, 0);
-                    
+
                     // get access to the staging buffer on CPU
                     var mapSource = _d3dDevice.ImmediateContext.MapSubresource(_stagingBuffer, 0, MapMode.Read, MapFlags.None);
 
                     // copy the data into byte array
-                    var data = new byte[mapSource.RowPitch]; // TODO: what does RowPitch mean?
+                    var data = new byte[DATA_STRIDE];
                     Marshal.Copy(mapSource.DataPointer, data, 0, data.Length);
 
                     // un-map the staging buffer
                     _d3dDevice.ImmediateContext.UnmapSubresource(_stagingBuffer, 0);
 
-                    // release resources
-                    srv.Dispose();
-
-                    _renderDoc?.API.EndFrameCapture(IntPtr.Zero, IntPtr.Zero);
+                    //_renderDoc?.API.EndFrameCapture(IntPtr.Zero, IntPtr.Zero);
 
                     // TODO: how big is data ? What format is it?
                     ledData.SetData(y * NUMBER_OF_EYES + x, data);
@@ -139,14 +139,11 @@ namespace CaptureCore {
             var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
             var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
 
-            _maxWorkMipLevel = (int)Math.Ceiling(Math.Log(Math.Max(stencilWidth, stencilHeight), 2)) + 1;
-
-            // Buffer that will hold a sub-region of the full frame
             _workBuffer = new Texture2D(_d3dDevice,
                 new Texture2DDescription {
-                    Width = (int)(SampleWidth * _frameWidth),
-                    Height = (int)(SampleHeight * _frameHeight),
-                    MipLevels = _maxWorkMipLevel, // amount of mip levels required to produce a 1x1 pixel texture
+                    Width = stencilWidth,
+                    Height = stencilHeight,
+                    MipLevels = 0, // 0 = full mipmap down to 1x1 pixel texture
                     ArraySize = 1, // only one texture used
                     Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm, // same as frame
                     SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
@@ -155,6 +152,8 @@ namespace CaptureCore {
                     CpuAccessFlags = CpuAccessFlags.None,
                     OptionFlags = ResourceOptionFlags.GenerateMipMaps // required by GenerateMips
                 });
+
+            _srv = new ShaderResourceView(_d3dDevice, _workBuffer);
 
             // staging buffer that will hold the smallest mip of the workbuffer
             _stagingBuffer = new Texture2D(_d3dDevice,
@@ -170,7 +169,6 @@ namespace CaptureCore {
                     CpuAccessFlags = CpuAccessFlags.Read,
                     OptionFlags = ResourceOptionFlags.None
                 });
-
         }
     }
 }

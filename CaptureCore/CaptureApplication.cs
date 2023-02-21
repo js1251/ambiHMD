@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Threading.Tasks;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.UI.Composition;
@@ -93,8 +94,9 @@ namespace CaptureCore {
             _frameProcessor = null;
         }
 
-        private void UpdateLedValues(object sender, Texture2D texture) {
+        private async void UpdateLedValues(object sender, Texture2D texture) {
             var ledData = _frameProcessor.ProcessFrame(texture);
+
             var ledAmount = NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES;
 
             for (var i = 0; i < ledAmount; i++) {

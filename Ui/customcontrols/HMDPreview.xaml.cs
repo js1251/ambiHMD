@@ -63,7 +63,7 @@ namespace Ui.customcontrols {
             var controlsWidth = (float)(width * dpiX);
 
             var padding = LeftLEDs.Size + RightLEDs.Size; // led
-            padding += (float) (LeftLEDs.Margin.Left + LeftLEDs.Margin.Right);
+            padding += (float)(LeftLEDs.Margin.Left + LeftLEDs.Margin.Right);
             padding += (float)(RightLEDs.Margin.Left + RightLEDs.Margin.Right);
 
             _root.Size = new Vector2(-controlsWidth - padding, 0);
@@ -102,13 +102,15 @@ namespace Ui.customcontrols {
                 SetLedColor(index, Color.FromArgb(colorData[3], colorData[2], colorData[1], colorData[0]));
             };
         }
+        
 
         public void SetLedColor(int index, Color color) {
             if (index % 2 == 0) {
                 // left eye
                 index /= 2;
                 LeftLEDs.SetColor(index, color);
-            } else {
+            }
+            else {
                 // right eye
                 index = (index - 1) / 2;
                 RightLEDs.SetColor(index, color);
