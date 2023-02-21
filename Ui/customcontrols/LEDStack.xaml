@@ -7,15 +7,13 @@
              x:Name="Control">
 
     <Grid>
-        <Rectangle Stroke="Blue"/>
-
         <ItemsControl
             ItemsSource="{Binding ElementName=Control, Path=Leds}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <StackPanel
-                        Orientation="Vertical"
-                        IsItemsHost="True" />
+                    <UniformGrid
+                        IsItemsHost="True"
+                        Columns="1"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
