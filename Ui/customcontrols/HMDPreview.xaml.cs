@@ -28,6 +28,10 @@ namespace Ui.customcontrols {
             set => SetLedBlur(value);
         }
 
+        public float Brightness {
+            set => SetLedBrightness(value);
+        }
+
         public float LedSize {
             set => SetLedSize(value);
         }
@@ -165,6 +169,11 @@ namespace Ui.customcontrols {
 
             LeftLEDs.BlurRadius = maxBlurSize * blurPercentage;
             RightLEDs.BlurRadius = maxBlurSize * blurPercentage;
+        }
+
+        private void SetLedBrightness(float brightnessPercentage) {
+            const int maxBrightness = 255;
+            _captureApp.Brightness = (int)(maxBrightness * brightnessPercentage);
         }
 
         private void SetLedSize(float size) {

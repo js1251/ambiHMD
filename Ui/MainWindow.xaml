@@ -6,8 +6,8 @@
         xmlns:customcontrols="clr-namespace:Ui.customcontrols"
         mc:Ignorable="d"
         Title="ambiHMD"
-        Height="500"
-        MinHeight="500"
+        Height="600"
+        MinHeight="600"
         Width="1000"
         MinWidth="1000"
         Loaded="Window_Loaded"
@@ -162,7 +162,8 @@
                                     HorizontalAlignment="Left" />
                                 <Slider
                                     Grid.Column="1"
-                                    VerticalAlignment="Center" />
+                                    VerticalAlignment="Center"
+                                    ValueChanged="Brightness_OnValueChanged"/>
                                 <Label
                                     Grid.Column="2"
                                     Content="100%"
@@ -224,7 +225,7 @@
                             Unchecked="SampleAreas_OnToggled" />
 
                         <StackPanel>
-                            <Label Content="LED Preview BlurPercentage" />
+                            <Label Content="Preview LED Blur" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -249,7 +250,7 @@
 
                         <!--Show LED Value checkbox-->
                         <CheckBox
-                            Content="Show LED values"
+                            Content="Preview LED values"
                             Margin="10"
                             Checked="LedValues_OnToggled"
                             Unchecked="LedValues_OnToggled" />

@@ -48,7 +48,7 @@
                             Visibility="{Binding ShowColorValue}"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Center"
-                            FontSize="6"
+                            FontSize="8"
                             IsReadOnly="True"
                             Background="Transparent"
                             BorderThickness="0" />

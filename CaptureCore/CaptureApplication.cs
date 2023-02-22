@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
-using System.Threading.Tasks;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.UI.Composition;
 using Composition.WindowsRuntimeHelpers;
 using SharpDX.Direct3D11;
+using ambiHMD.Communication;
 
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
@@ -23,6 +24,8 @@ namespace CaptureCore {
             }
         }
 
+        public int Brightness { get; set; }
+
         private Compositor _compositor;
         private readonly ContainerVisual _root;
 
@@ -34,6 +37,8 @@ namespace CaptureCore {
         
         private FrameProcessor _frameProcessor;
         private int _numberOfLedPerEye;
+
+        private AmbiHMDConnection _ambiHmdConnection;
 
         public CaptureApplication(Compositor c) {
             _compositor = c;
@@ -60,6 +65,8 @@ namespace CaptureCore {
             _content.Brush = Brush;
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
+
+            _ambiHmdConnection = new AmbiHMDConnection(4, 115200);
         }
 
         public Visual Visual => _root;
@@ -92,10 +99,16 @@ namespace CaptureCore {
             _capture?.Dispose();
             Brush.Surface = null;
             _frameProcessor = null;
+
+            // turn all LEDs off
+            var encoded = AmbiHMDEncoding.Encode(0, new byte[FrameProcessor.DATA_STRIDE * NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES], FrameProcessor.DATA_STRIDE);
+            _ambiHmdConnection.SendMessage(encoded);
         }
 
-        private async void UpdateLedValues(object sender, Texture2D texture) {
+        private void UpdateLedValues(object sender, Texture2D texture) {
             var ledData = _frameProcessor.ProcessFrame(texture);
+            var encoded = AmbiHMDEncoding.Encode(Brightness, ledData.Data, FrameProcessor.DATA_STRIDE);
+            _ambiHmdConnection.SendMessage(encoded);
 
             var ledAmount = NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES;
 

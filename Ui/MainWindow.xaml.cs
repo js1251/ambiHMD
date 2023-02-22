@@ -38,7 +38,10 @@ namespace Ui {
             InitMonitorList();
 
             HMDPreview.Window_Loaded(sender, e);
-            LedsPerEye = 6; // TODO: read from settings
+
+            LedsPerEye = 8; // TODO: read from settings
+            HMDPreview.Brightness = 5; // TODO: read from settings
+
             HMDPreview.Resize(ControlsGrid.ActualWidth);
         }
 
@@ -116,6 +119,11 @@ namespace Ui {
         private void BlurSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             var blur = e.NewValue / ((Slider)sender).Maximum;
             HMDPreview.BlurPercentage = (float)blur;
+        }
+
+        private void Brightness_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            var brightness = e.NewValue / ((Slider)sender).Maximum;
+            HMDPreview.Brightness = (float)brightness;
         }
 
         private void LedValues_OnToggled(object sender, RoutedEventArgs e) {
