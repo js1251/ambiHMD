@@ -15,37 +15,67 @@ using Windows.Graphics.Capture;
 namespace Ui.customcontrols {
     public partial class HMDPreview : UserControl {
         private int _ledPerEye;
-
         public int LedPerEye {
             get => _ledPerEye;
             set {
                 _ledPerEye = value;
-                SetLedCount(value);
+                _captureApp.NumberOfLedsPerEye = value;
+                LeftLEDs.Amount = value;
+                RightLEDs.Amount = value;
             }
         }
 
         public float BlurPercentage {
-            set => SetLedBlur(value);
+            set {
+                var ledSize = LeftLEDs.Size;
+                var maxBlurSize = ledSize * 2f;
+                // TODO: make depending on amount of leds too
+
+                LeftLEDs.BlurRadius = maxBlurSize * value;
+                RightLEDs.BlurRadius = maxBlurSize * value;
+            }
         }
 
         public float Brightness {
-            set => SetLedBrightness(value);
+            set {
+                const int maxBrightness = 255;
+                _captureApp.Brightness = (int)(maxBrightness * value);
+            }
+        }
+
+        public float VerticalSweep {
+            set => _captureApp.VerticalSweep = value;
+        }
+
+        public float HorizontalSweep {
+            set => _captureApp.HorizontalSweep = value;
         }
 
         public float LedSize {
-            set => SetLedSize(value);
+            set {
+                LeftLEDs.Size = value;
+                RightLEDs.Size = value;
+            }
         }
 
         public bool LedActive {
-            set => SetLedActive(value);
+            set {
+                LeftLEDs.IsActive = value;
+                RightLEDs.IsActive = value;
+            }
         }
 
         public bool ShowColorValue {
-            set => SetLedShowColorvalue(value);
+            set {
+                LeftLEDs.ShowColorValue = value;
+                RightLEDs.ShowColorValue = value;
+            }
         }
 
         public bool ShowSampleAreas {
-            set => SetSampleAreas(value);
+            set {
+                // TODO
+            }
         }
 
         private IntPtr _hwnd;
@@ -106,15 +136,14 @@ namespace Ui.customcontrols {
                 SetLedColor(index, Color.FromArgb(colorData[3], colorData[2], colorData[1], colorData[0]));
             };
         }
-        
+
 
         public void SetLedColor(int index, Color color) {
             if (index % 2 == 0) {
                 // left eye
                 index /= 2;
                 LeftLEDs.SetColor(index, color);
-            }
-            else {
+            } else {
                 // right eye
                 index = (index - 1) / 2;
                 RightLEDs.SetColor(index, color);
@@ -153,46 +182,6 @@ namespace Ui.customcontrols {
         public void StopCapture() {
             _captureApp.StopCapture();
             LedActive = false;
-        }
-
-        private void SetLedCount(int count) {
-            _captureApp.NumberOfLedsPerEye = count;
-            LeftLEDs.Amount = count;
-            RightLEDs.Amount = count;
-        }
-
-        private void SetLedBlur(float blurPercentage) {
-            var ledSize = LeftLEDs.Size;
-
-            var maxBlurSize = ledSize * 2f;
-            // TODO: make depending on amount of leds too
-
-            LeftLEDs.BlurRadius = maxBlurSize * blurPercentage;
-            RightLEDs.BlurRadius = maxBlurSize * blurPercentage;
-        }
-
-        private void SetLedBrightness(float brightnessPercentage) {
-            const int maxBrightness = 255;
-            _captureApp.Brightness = (int)(maxBrightness * brightnessPercentage);
-        }
-
-        private void SetLedSize(float size) {
-            LeftLEDs.Size = size;
-            RightLEDs.Size = size;
-        }
-
-        private void SetLedActive(bool isActive) {
-            LeftLEDs.IsActive = isActive;
-            RightLEDs.IsActive = isActive;
-        }
-
-        private void SetLedShowColorvalue(bool showColorvalue) {
-            LeftLEDs.ShowColorValue = showColorvalue;
-            RightLEDs.ShowColorValue = showColorvalue;
-        }
-
-        private void SetSampleAreas(bool showSampleAreas) {
-            // TODO: implement
         }
     }
 }

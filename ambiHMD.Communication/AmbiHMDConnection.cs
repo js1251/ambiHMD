@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Threading.Tasks;
 
@@ -12,7 +11,12 @@ namespace ambiHMD.Communication {
                 BaudRate = baudRate
             };
 
-            _serialPort.Open();
+            try {
+                _serialPort.Open();
+            } catch {
+                // TODO: handle!
+                return;
+            }
 
             _lastSend = DateTime.Now;
         }
@@ -20,6 +24,10 @@ namespace ambiHMD.Communication {
         private DateTime _lastSend;
 
         public Task SendMessage(string message) {
+            if (!_serialPort.IsOpen) {
+                return null; // TODO: handle
+            }
+            
             if (DateTime.Now - _lastSend < TimeSpan.FromMilliseconds(20)) {
                 return null;
             }

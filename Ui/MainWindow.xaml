@@ -63,8 +63,8 @@
                     Margin="0, 10, 0 ,10">
 
                     <Rectangle
-                        Stroke="WhiteSmoke"
-                        StrokeThickness="1" />
+                        Stroke="Black"
+                        Opacity="0.3" />
 
                     <StackPanel>
                         <!--Picker-->
@@ -110,7 +110,7 @@
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
-                            
+
                             <TextBlock
                                 x:Name="MonitorComboPlaceholder"
                                 IsHitTestVisible="False"
@@ -122,141 +122,155 @@
                     </StackPanel>
                 </Grid>
 
-                <Grid>
-                    <Rectangle
-                        Stroke="WhiteSmoke"
-                        StrokeThickness="1" />
-
-                    <StackPanel>
-
-                        <!--LEDs per eye input-->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-                            <Label
-                                Grid.Column="0"
-                                VerticalAlignment="Center"
-                                Margin="0, 0, 40, 0"
-                                Content="LEDs per Eye:" />
-                            <TextBox
-                                Grid.Column="1"
-                                TextAlignment="Right"
-                                VerticalAlignment="Center"
-                                Text="{Binding ElementName=Root, Path=LedsPerEye, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </Grid>
+                <StackPanel
+                    Margin="0, 10, 0 ,10">
+                    <Grid
+                        Margin="0, 0, 0 ,10">
+                        <Rectangle
+                            Stroke="Black"
+                            Opacity="0.3" />
 
                         <StackPanel>
-                            <Label Content="LED Brightness" />
+
+                            <!--LEDs per eye input-->
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-
                                 <Label
                                     Grid.Column="0"
-                                    Content="0%"
-                                    HorizontalAlignment="Left" />
-                                <Slider
-                                    Grid.Column="1"
                                     VerticalAlignment="Center"
-                                    ValueChanged="Brightness_OnValueChanged"/>
-                                <Label
-                                    Grid.Column="2"
-                                    Content="100%"
-                                    HorizontalAlignment="Right" />
-                            </Grid>
-                        </StackPanel>
-
-                        <StackPanel>
-                            <Label Content="Vertical Sweep" />
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Label
-                                    Grid.Column="0"
-                                    Content="0%"
-                                    HorizontalAlignment="Left" />
-                                <Slider
+                                    Margin="0, 0, 20, 0"
+                                    Content="LEDs per Eye:" />
+                                <TextBox
                                     Grid.Column="1"
-                                    VerticalAlignment="Center" />
-                                <Label
-                                    Grid.Column="2"
-                                    Content="100%"
-                                    HorizontalAlignment="Right" />
-                            </Grid>
-                        </StackPanel>
-
-                        <StackPanel>
-                            <Label Content="Horizontal Sweep" />
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Label
-                                    Grid.Column="0"
-                                    Content="0%"
-                                    HorizontalAlignment="Left" />
-                                <Slider
-                                    Grid.Column="1"
-                                    VerticalAlignment="Center" />
-                                <Label
-                                    Grid.Column="2"
-                                    Content="100%"
-                                    HorizontalAlignment="Right" />
-                            </Grid>
-                        </StackPanel>
-
-                        <!--Show LED Sample Areas checkbox-->
-                        <CheckBox
-                            Content="Show Sample Areas"
-                            Margin="10"
-                            Checked="SampleAreas_OnToggled"
-                            Unchecked="SampleAreas_OnToggled" />
-
-                        <StackPanel>
-                            <Label Content="Preview LED Blur" />
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Label
-                                    Grid.Column="0"
-                                    Content="0%"
-                                    HorizontalAlignment="Left" />
-                                <Slider
-                                    Grid.Column="1"
+                                    Margin="0, 0, 5, 0"
+                                    TextAlignment="Right"
                                     VerticalAlignment="Center"
-                                    ValueChanged="BlurSlider_OnValueChanged" />
-                                <Label
-                                    Grid.Column="2"
-                                    Content="100%"
-                                    HorizontalAlignment="Right" />
+                                    Text="{Binding ElementName=Root, Path=LedsPerEye, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
+
+                            <StackPanel>
+                                <Label Content="LED Brightness" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label
+                                        Grid.Column="0"
+                                        Content="0%"
+                                        HorizontalAlignment="Left" />
+                                    <Slider
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        ValueChanged="Brightness_OnValueChanged" />
+                                    <Label
+                                        Grid.Column="2"
+                                        Content="100%"
+                                        HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <Label Content="Vertical Sweep" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label
+                                        Grid.Column="0"
+                                        Content="0%"
+                                        HorizontalAlignment="Left" />
+                                    <Slider
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        ValueChanged="VerticalSweep_OnValueChanged" />
+                                    <Label
+                                        Grid.Column="2"
+                                        Content="100%"
+                                        HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <Label Content="Horizontal Sweep" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label
+                                        Grid.Column="0"
+                                        Content="0%"
+                                        HorizontalAlignment="Left" />
+                                    <Slider
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        ValueChanged="HorizontalSweep_OnValueChanged" />
+                                    <Label
+                                        Grid.Column="2"
+                                        Content="100%"
+                                        HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
                         </StackPanel>
+                    </Grid>
 
-                        <!--Show LED Value checkbox-->
-                        <CheckBox
-                            Content="Preview LED values"
-                            Margin="10"
-                            Checked="LedValues_OnToggled"
-                            Unchecked="LedValues_OnToggled" />
-                    </StackPanel>
-                </Grid>
+                    <Grid>
+                        <Rectangle
+                            Stroke="Black"
+                            Opacity="0.3" />
 
+                        <StackPanel>
+                            <!--Show LED Sample Areas checkbox-->
+                            <CheckBox
+                                Content="Show Sample Areas"
+                                Margin="10"
+                                Checked="SampleAreas_OnToggled"
+                                Unchecked="SampleAreas_OnToggled" />
+
+                            <StackPanel>
+                                <Label Content="Preview LED Blur" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label
+                                        Grid.Column="0"
+                                        Content="0%"
+                                        HorizontalAlignment="Left" />
+                                    <Slider
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        ValueChanged="BlurSlider_OnValueChanged" />
+                                    <Label
+                                        Grid.Column="2"
+                                        Content="100%"
+                                        HorizontalAlignment="Right" />
+                                </Grid>
+                            </StackPanel>
+
+                            <!--Show LED Value checkbox-->
+                            <CheckBox
+                                Content="Preview LED values"
+                                Margin="10"
+                                Checked="LedValues_OnToggled"
+                                Unchecked="LedValues_OnToggled" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
             </StackPanel>
 
             <Button

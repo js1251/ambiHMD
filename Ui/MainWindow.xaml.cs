@@ -41,6 +41,8 @@ namespace Ui {
 
             LedsPerEye = 8; // TODO: read from settings
             HMDPreview.Brightness = 5; // TODO: read from settings
+            HMDPreview.VerticalSweep = 0.1f;
+            HMDPreview.HorizontalSweep = 1f / LedsPerEye;
 
             HMDPreview.Resize(ControlsGrid.ActualWidth);
         }
@@ -124,6 +126,16 @@ namespace Ui {
         private void Brightness_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             var brightness = e.NewValue / ((Slider)sender).Maximum;
             HMDPreview.Brightness = (float)brightness;
+        }
+
+        private void HorizontalSweep_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            var sweep = e.NewValue / ((Slider)sender).Maximum;
+            HMDPreview.HorizontalSweep = Math.Max((float)sweep, 0.01f);
+        }
+
+        private void VerticalSweep_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            var sweep = e.NewValue / ((Slider)sender).Maximum;
+            HMDPreview.VerticalSweep = Math.Max((float)sweep, 0.01f);
         }
 
         private void LedValues_OnToggled(object sender, RoutedEventArgs e) {

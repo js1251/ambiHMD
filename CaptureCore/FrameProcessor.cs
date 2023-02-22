@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 using WaveEngine.Bindings.RenderDoc;
@@ -18,19 +17,19 @@ namespace CaptureCore {
         }
 
         // TODO: set externally
-        public float SampleWidth {
-            get => _sampleWidth;
+        public float VerticalSweep {
+            get => _verticalSweep;
             set {
-                _sampleWidth = value;
+                _verticalSweep = value;
                 InitializeBuffers();
             }
         }
 
         // TODO: set externally
-        public float SampleHeight {
-            get => _sampleHeight;
+        public float HorizontalSweep {
+            get => _horizontalSweep;
             set {
-                _sampleHeight = value;
+                _horizontalSweep = value;
                 InitializeBuffers();
             }
         }
@@ -40,8 +39,8 @@ namespace CaptureCore {
         private int _numberOfLedsPerEye;
         private int _frameWidth;
         private int _frameHeight;
-        private float _sampleWidth;
-        private float _sampleHeight;
+        private float _verticalSweep;
+        private float _horizontalSweep;
 
         #endregion Backing Fields
 
@@ -52,15 +51,16 @@ namespace CaptureCore {
         private ShaderResourceView _srv;
 
         private float _xRightStart;
-        private float _yStep;
 
-        private readonly RenderDoc _renderDoc;
+        //private readonly RenderDoc _renderDoc;
 
-        public FrameProcessor(Device d3dDevice, int numberOfLedsPerEye) {
+        public FrameProcessor(Device d3dDevice, int numberOfLedsPerEye, float verticalSweep, float horizontalSweep) {
             _d3dDevice = d3dDevice;
             _numberOfLedsPerEye = numberOfLedsPerEye;
+            _verticalSweep = verticalSweep;
+            _horizontalSweep = horizontalSweep;
 
-            RenderDoc.Load(out _renderDoc);
+            //RenderDoc.Load(out _renderDoc);
         }
 
         public void SetFrameSize(int width, int height) {
@@ -76,20 +76,25 @@ namespace CaptureCore {
             for (var y = 0; y < NumberOfLedsPerEye; y++) {
                 for (var x = 0; x < NUMBER_OF_EYES; x++) {
                     var xStart = (int)Math.Floor(x > 0 ? _xRightStart : 0);
-                    var yStart = (int)Math.Floor(y * _yStep);
 
-                    //_renderDoc?.API.StartFrameCapture(IntPtr.Zero, IntPtr.Zero);
+                    var yDivider = (float)_frameHeight / (NumberOfLedsPerEye + 1);
+                    var yMiddleOffset = (y + 1) * yDivider;
+                    var yTopOffset = yMiddleOffset - 0.5f * _frameHeight * VerticalSweep;
+                    var yStart = (int)Math.Floor(yTopOffset);
 
-                    var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
-                    var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
+                    var stencilWidth = (int)Math.Floor(HorizontalSweep * _frameWidth);
+                    var stencilHeight = (int)Math.Floor(VerticalSweep * _frameHeight);
+
                     var sourceRegion = new ResourceRegion {
                         Left = xStart,
-                        Top = yStart,
+                        Top = Math.Max(yStart, 0),
                         Front = 0,
                         Right = xStart + stencilWidth,
-                        Bottom = yStart + stencilHeight,
+                        Bottom = Math.Min(yStart + stencilHeight, _frameHeight),
                         Back = 1
                     };
+
+                    //_renderDoc?.API.StartFrameCapture(IntPtr.Zero, IntPtr.Zero);
 
                     // copy part of frame into workBuffer
                     _d3dDevice.ImmediateContext.CopySubresourceRegion(frame, 0, sourceRegion, _workBuffer, 0);
@@ -128,16 +133,10 @@ namespace CaptureCore {
         }
 
         private void InitializeBuffers() {
-            // TODO: temporarily set SampleWidth and Height to hardcoded values
-            _sampleWidth = 0.1f; // 10% of the frame width
-            _sampleHeight = 1f / NumberOfLedsPerEye; // 1/NumberOfLedsPerEye of the frame height
-            // TODO: this will be more complicated once stencils can be bigger, since they could reach out of the frame
+            _xRightStart = _frameWidth - HorizontalSweep * _frameWidth;
 
-            _yStep = _frameHeight * _sampleHeight;
-            _xRightStart = _frameWidth - SampleWidth * _frameWidth;
-
-            var stencilWidth = (int)Math.Floor(SampleWidth * _frameWidth);
-            var stencilHeight = (int)Math.Floor(SampleHeight * _frameHeight);
+            var stencilWidth = (int)Math.Floor(HorizontalSweep * _frameWidth);
+            var stencilHeight = (int)Math.Floor(VerticalSweep * _frameHeight);
 
             _workBuffer = new Texture2D(_d3dDevice,
                 new Texture2DDescription {

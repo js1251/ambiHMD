@@ -10,10 +10,10 @@ using ambiHMD.Communication;
 
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
-
         public delegate void ColorChangedArg(CaptureApplication sender, int index, byte[] colorData);
 
         public event ColorChangedArg ColorChanged;
+
         public int NumberOfLedsPerEye {
             private get => _numberOfLedPerEye;
             set {
@@ -23,6 +23,29 @@ namespace CaptureCore {
                 }
             }
         }
+
+        public float VerticalSweep {
+            set {
+                _verticalSweep = value;
+
+                if (_frameProcessor != null) {
+                    _frameProcessor.VerticalSweep = value;
+                }
+            }
+        }
+
+        public float HorizontalSweep {
+            set {
+                _horizontalSweep = value;
+
+                if (_frameProcessor != null) {
+                    _frameProcessor.HorizontalSweep = value;
+                }
+            }
+        }
+
+        private float _horizontalSweep;
+        private float _verticalSweep;
 
         public int Brightness { get; set; }
 
@@ -34,11 +57,11 @@ namespace CaptureCore {
 
         private readonly IDirect3DDevice _device;
         private WindowCapture _capture;
-        
+
         private FrameProcessor _frameProcessor;
         private int _numberOfLedPerEye;
 
-        private AmbiHMDConnection _ambiHmdConnection;
+        private readonly AmbiHMDConnection _ambiHmdConnection;
 
         public CaptureApplication(Compositor c) {
             _compositor = c;
@@ -89,7 +112,7 @@ namespace CaptureCore {
 
             _capture.StartCapture();
 
-            _frameProcessor = new FrameProcessor(_capture.D3dDevice, NumberOfLedsPerEye);
+            _frameProcessor = new FrameProcessor(_capture.D3dDevice, NumberOfLedsPerEye, _verticalSweep, _horizontalSweep);
 
             _capture.TextureChanged += UpdateLedValues;
             _capture.TextureSizeChanged += UpdateFrameSize;
