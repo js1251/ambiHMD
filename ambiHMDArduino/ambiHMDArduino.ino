@@ -42,10 +42,11 @@ void setup() {
   strip_left.begin();
   strip_right.begin();
 
-  strip_left.setBrightness(50);
-  strip_right.setBrightness(50);
+  strip_left.setBrightness(20);
+  strip_right.setBrightness(20);
 
   strip_left.setPixelColor(0, strip_left.Color(0, 255, 0));
+  strip_right.setPixelColor(0, strip_right.Color(0, 255, 0));
 
   strip_left.show();
   strip_right.show();
@@ -147,8 +148,6 @@ void processIncomingByte(const byte inByte) {
 
 void loop() {
   // if serial data available, process it
-  static char[8] {0, 255, 0, 255, 0, 255, 0, 255};
-
   while (Serial.available () > 0) {
     processIncomingByte(Serial.read());
   }
