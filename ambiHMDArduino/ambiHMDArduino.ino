@@ -46,7 +46,7 @@ void setup() {
   strip_right.setBrightness(20);
 
   strip_left.setPixelColor(0, strip_left.Color(0, 255, 0));
-  strip_right.setPixelColor(0, strip_right.Color(0, 255, 0));
+  strip_right.setPixelColor(0, strip_right.Color(255, 0, 0));
 
   strip_left.show();
   strip_right.show();
