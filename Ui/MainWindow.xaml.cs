@@ -39,11 +39,16 @@ namespace Ui {
 
             HMDPreview.Window_Loaded(sender, e);
 
-            LedsPerEye = 8; // TODO: read from settings
-            HMDPreview.Brightness = 5; // TODO: read from settings
+            // TODO: read from settings
+            LedsPerEye = 8;
+            HMDPreview.Brightness = 5;
             HMDPreview.VerticalSweep = 0.1f;
-            HMDPreview.HorizontalSweep = 1f / LedsPerEye;
+            HMDPreview.BlurPercentage = 0;
+            HMDPreview.GammaCorrection = 2;
+            HMDPreview.Smoothing = 10;
+            // TODO: read from settings
 
+            HMDPreview.HorizontalSweep = 1f / LedsPerEye;
             HMDPreview.Resize(ControlsGrid.ActualWidth);
         }
 
@@ -147,11 +152,17 @@ namespace Ui {
         }
 
         private void Gamma_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            // TODO: implement gamma correction
+            var correction = e.NewValue / ((Slider)sender).Maximum;
+            HMDPreview.GammaCorrection = (float)correction;
         }
 
         private void Smoothing_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            // TODO: implement gamma correction
+            var correction = e.NewValue / ((Slider)sender).Maximum;
+            HMDPreview.Smoothing = (float)correction;
+        }
+
+        private void Luminance_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            throw new NotImplementedException();
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e) {

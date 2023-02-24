@@ -15,6 +15,7 @@ using Windows.Graphics.Capture;
 namespace Ui.customcontrols {
     public partial class HMDPreview : UserControl {
         private int _ledPerEye;
+
         public int LedPerEye {
             get => _ledPerEye;
             set {
@@ -78,6 +79,14 @@ namespace Ui.customcontrols {
             }
         }
 
+        public float GammaCorrection {
+            set => _captureApp.GammaCorrection = value;
+        }
+
+        public float Smoothing {
+            set => _captureApp.Smoothing = value;
+        }
+
         private IntPtr _hwnd;
         private Compositor _compositor;
         private CompositionTarget _target;
@@ -105,8 +114,7 @@ namespace Ui.customcontrols {
         }
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
-            var window = sender as Window;
-            var interopWindow = new WindowInteropHelper(window);
+            var interopWindow = new WindowInteropHelper(sender as Window);
             _hwnd = interopWindow.Handle;
             _compositor = new Compositor();
 

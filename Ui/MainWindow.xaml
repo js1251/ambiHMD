@@ -108,11 +108,11 @@
                         x:Name="PickerButton"
                         Content="Open Picker"
                         Click="PickerButton_Click"
-                        Margin="10" />
+                        Margin="10, 10, 10, 5" />
 
                     <!--Window DropDown-->
                     <Grid
-                        Margin="10">
+                        Margin="10, 5, 10, 5">
                         <ComboBox
                             x:Name="WindowComboBox"
                             SelectionChanged="WindowComboBox_SelectionChanged">
@@ -137,7 +137,7 @@
 
                     <!--Monitor DropDown-->
                     <Grid
-                        Margin="10">
+                        Margin="10, 5, 10, 5">
                         <ComboBox
                             x:Name="MonitorComboBox"
                             SelectionChanged="MonitorComboBox_SelectionChanged">
@@ -161,10 +161,10 @@
                     </Grid>
 
                     <Button
+                        Margin="10, 5, 10, 10"
                         x:Name="StopButton"
                         Content="Stop Capture"
-                        Click="StopButton_Click"
-                        Margin="10" />
+                        Click="StopButton_Click"/>
                 </StackPanel>
             </Grid>
 
@@ -191,7 +191,7 @@
                                     Grid.Column="0"
                                     VerticalAlignment="Center"
                                     Margin="0, 0, 20, 0"
-                                    Content="LEDs per Eye:" />
+                                    Content="LEDs per eye:" />
                                 <TextBox
                                     Grid.Column="1"
                                     Margin="0, 0, 5, 0"
@@ -232,18 +232,27 @@
                         <StackPanel>
                             <Label Content="Gamma Correction" />
                             <Slider
-                                Maximum="2"
-                                Minimum="1"
+                                Maximum="4"
+                                Minimum="0"
                                 TickFrequency="0.1"
                                 ValueChanged="Gamma_OnValueChanged"
                                 Style="{StaticResource ValueSliderStyle}"
                                 Margin="10, 0, 5, 0" />
 
-                            <Label Content="Input Smoothing" />
+                            <Label Content="Luminance Correction" />
                             <Slider
                                 Maximum="100"
                                 Minimum="0"
-                                TickFrequency="10"
+                                TickFrequency="5"
+                                ValueChanged="Luminance_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 5" />
+
+                            <Label Content="Input Smoothing" />
+                            <Slider
+                                Maximum="80"
+                                Minimum="0"
+                                TickFrequency="5"
                                 ValueChanged="Smoothing_OnValueChanged"
                                 Style="{StaticResource ValueSliderStyle}"
                                 Margin="10, 0, 5, 5" />
