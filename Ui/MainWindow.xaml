@@ -42,6 +42,42 @@
                 </Setter>
             </Style.Setters>
         </Style>
+
+        <Style
+            BasedOn="{StaticResource {x:Type Slider}}"
+            TargetType="{x:Type Slider}"
+            x:Key="ValueSliderStyle">
+            <Style.Setters>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Slider">
+                            <Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="30" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox
+                                        Grid.Column="0"
+                                        Text="{Binding ElementName=slValue, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                                        TextAlignment="Right"
+                                        Margin="0, 0, 5, 5" />
+                                    <Slider
+                                        Grid.Column="1"
+                                        TickPlacement="BottomRight"
+                                        Maximum="{TemplateBinding Maximum}"
+                                        Minimum="{TemplateBinding Minimum}"
+                                        TickFrequency="{TemplateBinding TickFrequency}"
+                                        IsSnapToTickEnabled="True"
+                                        Name="slValue" />
+                                </Grid>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style.Setters>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -51,81 +87,94 @@
         </Grid.ColumnDefinitions>
 
         <Grid
-            x:Name="ControlsGrid"
-            Grid.Column="0">
+            Grid.Column="0"
+            x:Name="ControlsGrid">
+
             <Grid.RowDefinitions>
-                <RowDefinition />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Margin="10">
-                <Grid
-                    Margin="0, 10, 0 ,10">
+            <Grid
+                Grid.Row="0"
+                Margin="10, 10, 10, 0">
+                <Rectangle
+                    Stroke="Black"
+                    Opacity="0.3" />
 
-                    <Rectangle
-                        Stroke="Black"
-                        Opacity="0.3" />
+                <StackPanel>
+                    <!--Picker-->
+                    <Button
+                        x:Name="PickerButton"
+                        Content="Open Picker"
+                        Click="PickerButton_Click"
+                        Margin="10" />
 
-                    <StackPanel>
-                        <!--Picker-->
-                        <Button x:Name="PickerButton" Content="Use Picker" Click="PickerButton_Click" Margin="10" />
-
-                        <!--Window DropDown-->
-                        <Grid
-                            Margin="10">
-                            <ComboBox
-                                x:Name="WindowComboBox"
-                                SelectionChanged="WindowComboBox_SelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock
-                                            MaxWidth="110"
-                                            TextTrimming="CharacterEllipsis"
-                                            Text="{Binding MainWindowTitle}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <TextBlock
-                                x:Name="WindowComboPlaceholder"
-                                IsHitTestVisible="False"
-                                VerticalAlignment="Center"
-                                Margin="5, 0, 0, 0"
-                                Text="Select Process ..."
-                                Opacity="0.6" />
-                        </Grid>
-
-                        <!--Monitor DropDown-->
-                        <Grid
-                            Margin="10">
-                            <ComboBox
-                                x:Name="MonitorComboBox"
-                                SelectionChanged="MonitorComboBox_SelectionChanged">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock
-                                            MaxWidth="110"
-                                            TextTrimming="CharacterEllipsis"
-                                            Text="{Binding DeviceName}" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-
-                            <TextBlock
-                                x:Name="MonitorComboPlaceholder"
-                                IsHitTestVisible="False"
-                                VerticalAlignment="Center"
-                                Margin="5, 0, 0, 0"
-                                Text="Select Display ..."
-                                Opacity="0.6" />
-                        </Grid>
-                    </StackPanel>
-                </Grid>
-
-                <StackPanel
-                    Margin="0, 10, 0 ,10">
+                    <!--Window DropDown-->
                     <Grid
-                        Margin="0, 0, 0 ,10">
+                        Margin="10">
+                        <ComboBox
+                            x:Name="WindowComboBox"
+                            SelectionChanged="WindowComboBox_SelectionChanged">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        MaxWidth="110"
+                                        TextTrimming="CharacterEllipsis"
+                                        Text="{Binding MainWindowTitle}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock
+                            x:Name="WindowComboPlaceholder"
+                            IsHitTestVisible="False"
+                            VerticalAlignment="Center"
+                            Margin="5, 0, 0, 0"
+                            Text="Select Process ..."
+                            Opacity="0.6" />
+                    </Grid>
+
+                    <!--Monitor DropDown-->
+                    <Grid
+                        Margin="10">
+                        <ComboBox
+                            x:Name="MonitorComboBox"
+                            SelectionChanged="MonitorComboBox_SelectionChanged">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        MaxWidth="110"
+                                        TextTrimming="CharacterEllipsis"
+                                        Text="{Binding DeviceName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock
+                            x:Name="MonitorComboPlaceholder"
+                            IsHitTestVisible="False"
+                            VerticalAlignment="Center"
+                            Margin="5, 0, 0, 0"
+                            Text="Select Display ..."
+                            Opacity="0.6" />
+                    </Grid>
+
+                    <Button
+                        x:Name="StopButton"
+                        Content="Stop Capture"
+                        Click="StopButton_Click"
+                        Margin="10" />
+                </StackPanel>
+            </Grid>
+
+
+            <ScrollViewer
+                Grid.Row="1"
+                Margin="10, 10, 10, 0"
+                HorizontalScrollBarVisibility="Hidden">
+                <StackPanel Margin="0, 0, 10, 0">
+                    <Grid>
                         <Rectangle
                             Stroke="Black"
                             Opacity="0.3" />
@@ -146,139 +195,93 @@
                                 <TextBox
                                     Grid.Column="1"
                                     Margin="0, 0, 5, 0"
-                                    TextAlignment="Right"
                                     VerticalAlignment="Center"
                                     Text="{Binding ElementName=Root, Path=LedsPerEye, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             </Grid>
 
-                            <StackPanel>
-                                <Label Content="LED Brightness" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <CheckBox
+                                Content="Show LED values"
+                                Margin="10"
+                                Checked="LedValues_OnToggled"
+                                Unchecked="LedValues_OnToggled" />
 
-                                    <Label
-                                        Grid.Column="0"
-                                        Content="0%"
-                                        HorizontalAlignment="Left" />
-                                    <Slider
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        ValueChanged="Brightness_OnValueChanged" />
-                                    <Label
-                                        Grid.Column="2"
-                                        Content="100%"
-                                        HorizontalAlignment="Right" />
-                                </Grid>
-                            </StackPanel>
+                            <Label Content="LED Brightness" />
+                            <Slider
+                                Maximum="255"
+                                TickFrequency="1"
+                                ValueChanged="Brightness_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 0" />
 
-                            <StackPanel>
-                                <Label Content="Vertical Sweep" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <Label
-                                        Grid.Column="0"
-                                        Content="0%"
-                                        HorizontalAlignment="Left" />
-                                    <Slider
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        ValueChanged="VerticalSweep_OnValueChanged" />
-                                    <Label
-                                        Grid.Column="2"
-                                        Content="100%"
-                                        HorizontalAlignment="Right" />
-                                </Grid>
-                            </StackPanel>
-
-                            <StackPanel>
-                                <Label Content="Horizontal Sweep" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <Label
-                                        Grid.Column="0"
-                                        Content="0%"
-                                        HorizontalAlignment="Left" />
-                                    <Slider
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        ValueChanged="HorizontalSweep_OnValueChanged" />
-                                    <Label
-                                        Grid.Column="2"
-                                        Content="100%"
-                                        HorizontalAlignment="Right" />
-                                </Grid>
-                            </StackPanel>
+                            <Label Content="Preview LED Blur" />
+                            <Slider
+                                Maximum="100"
+                                TickFrequency="1"
+                                ValueChanged="BlurSlider_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 10" />
                         </StackPanel>
                     </Grid>
 
-                    <Grid>
+                    <Grid
+                        Margin="0, 10, 0 ,0">
                         <Rectangle
                             Stroke="Black"
                             Opacity="0.3" />
 
                         <StackPanel>
-                            <!--Show LED Sample Areas checkbox-->
+                            <Label Content="Gamma Correction" />
+                            <Slider
+                                Maximum="2"
+                                Minimum="1"
+                                TickFrequency="0.1"
+                                ValueChanged="Gamma_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 0" />
+
+                            <Label Content="Input Smoothing" />
+                            <Slider
+                                Maximum="100"
+                                Minimum="0"
+                                TickFrequency="10"
+                                ValueChanged="Smoothing_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 5" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid
+                        Margin="0, 10, 0 ,10">
+                        <Rectangle
+                            Stroke="Black"
+                            Opacity="0.3" />
+
+                        <StackPanel>
                             <CheckBox
                                 Content="Show Sample Areas"
                                 Margin="10"
                                 Checked="SampleAreas_OnToggled"
                                 Unchecked="SampleAreas_OnToggled" />
 
-                            <StackPanel>
-                                <Label Content="Preview LED Blur" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <Label Content="Vertical Sweep" />
+                            <Slider
+                                Maximum="100"
+                                TickFrequency="1"
+                                ValueChanged="VerticalSweep_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 0" />
 
-                                    <Label
-                                        Grid.Column="0"
-                                        Content="0%"
-                                        HorizontalAlignment="Left" />
-                                    <Slider
-                                        Grid.Column="1"
-                                        VerticalAlignment="Center"
-                                        ValueChanged="BlurSlider_OnValueChanged" />
-                                    <Label
-                                        Grid.Column="2"
-                                        Content="100%"
-                                        HorizontalAlignment="Right" />
-                                </Grid>
-                            </StackPanel>
-
-                            <!--Show LED Value checkbox-->
-                            <CheckBox
-                                Content="Preview LED values"
-                                Margin="10"
-                                Checked="LedValues_OnToggled"
-                                Unchecked="LedValues_OnToggled" />
+                            <Label Content="Horizontal Sweep" />
+                            <Slider
+                                Maximum="100"
+                                TickFrequency="1"
+                                ValueChanged="HorizontalSweep_OnValueChanged"
+                                Style="{StaticResource ValueSliderStyle}"
+                                Margin="10, 0, 5, 10" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
-            </StackPanel>
-
-            <Button
-                x:Name="StopButton"
-                Grid.Row="1"
-                Content="Stop Capture"
-                Click="StopButton_Click"
-                Margin="10" />
+            </ScrollViewer>
         </Grid>
 
         <Grid

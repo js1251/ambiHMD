@@ -89,7 +89,7 @@ namespace CaptureCore {
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
 
-            _ambiHmdConnection = new AmbiHMDConnection(4, 115200);
+            _ambiHmdConnection = new AmbiHMDConnection(2, 115200);
         }
 
         public Visual Visual => _root;

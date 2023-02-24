@@ -146,6 +146,14 @@ namespace Ui {
             HMDPreview.ShowSampleAreas = ((CheckBox)sender).IsChecked.Value;
         }
 
+        private void Gamma_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            // TODO: implement gamma correction
+        }
+
+        private void Smoothing_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            // TODO: implement gamma correction
+        }
+
         private void StopButton_Click(object sender, RoutedEventArgs e) {
             HMDPreview.StopCapture();
 
