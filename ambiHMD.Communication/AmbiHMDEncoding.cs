@@ -1,10 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace ambiHMD.Communication {
     public class AmbiHMDEncoder {
         public int Brightness { private get; set; }
         public float GammaCorrection { private get; set; }
+        public float LuminanceCorrection { private get; set; }
         public float Smoothing { private get; set; }
+        private DateTime _lastSmooth;
 
         public int NumLeds {
             private get { return _numLeds; }
@@ -38,6 +42,9 @@ namespace ambiHMD.Communication {
 
             var leftEncoded = "";
             var rightEncoded = "";
+
+            var deltaTime = (DateTime.Now - _lastSmooth).TotalMilliseconds;
+
             for (var i = 0; i < dataPoints; i++) {
                 // BGRA
 
@@ -49,10 +56,13 @@ namespace ambiHMD.Communication {
                 var _ = stream.ReadByte();
 
                 // gamma correction
-                (r, g, b) = GammaMethod1(r, g, b);
+                (r, g, b) = GammaCorrect(r, g, b);
+
+                // luminance correction
+                (r, g, b) = LuminanceCorrect(r, g, b);
 
                 // smoothing
-                (r, g, b) = Smooth(i, r, g, b);
+                (r, g, b) = Smooth(i, r, g, b, deltaTime);
 
                 var bStr = b.ToString("D3");
                 var gStr = g.ToString("D3");
@@ -66,51 +76,57 @@ namespace ambiHMD.Communication {
                 }
             }
 
+            _lastSmooth = DateTime.Now;
+
             stream.Close();
 
             return Brightness.ToString("D3") + leftEncoded + rightEncoded;
         }
 
-        private (int, int, int) GammaMethod1(int r, int g, int b) {
+        private (int, int, int) GammaCorrect(int r, int g, int b) {
             // normalize between 0 and 255
-            var b_norm = b / 255f;
-            var g_norm = g / 255f;
-            var r_norm = r / 255f;
+            var bNorm = b / 255f;
+            var gNorm = g / 255f;
+            var rNorm = r / 255f;
 
             // gamma correction
-            var b_gamma = (float)System.Math.Pow(b_norm, GammaCorrection);
-            var g_gamma = (float)System.Math.Pow(g_norm, GammaCorrection);
-            var r_gamma = (float)System.Math.Pow(r_norm, GammaCorrection);
+            var bGamma = (float)Math.Pow(bNorm, GammaCorrection);
+            var gGamma = (float)Math.Pow(gNorm, GammaCorrection);
+            var rGamma = (float)Math.Pow(rNorm, GammaCorrection);
 
             // scale back to 0-255
-            b = (int)(b_gamma * 255);
-            g = (int)(g_gamma * 255);
-            r = (int)(r_gamma * 255);
+            b = (int)(bGamma * 255);
+            g = (int)(gGamma * 255);
+            r = (int)(rGamma * 255);
 
             return (r, g, b);
         }
 
-        private (int, int, int) GammaMethod2(int r, int g, int b) {
-            var b_norm = b / 255f;
-            var g_norm = g / 255f;
-            var r_norm = r / 255f;
+        private (int, int, int) LuminanceCorrect(int r, int g, int b) {
+            var bNorm = b / 255f;
+            var gNorm = g / 255f;
+            var rNorm = r / 255f;
 
-            var adjustment = (0.2126 * r_norm + 0.7152 * g_norm + 0.0722 * b_norm);
+            var luminance = 0.2126 * rNorm + 0.7152 * gNorm + 0.0722 * bNorm;
 
-            r = (int)(r * adjustment);
-            g = (int)(g * adjustment);
-            b = (int)(b * adjustment);
+            r = (int)(r * luminance * LuminanceCorrection + r * (1 - LuminanceCorrection));
+            g = (int)(g * luminance * LuminanceCorrection + g * (1 - LuminanceCorrection));
+            b = (int)(b * luminance * LuminanceCorrection + b * (1 - LuminanceCorrection));
 
             return (r, g, b);
         }
 
-        private (int, int, int) Smooth(int index, int r, int g, int b) {
+        private (int, int, int) Smooth(int index, int r, int g, int b, double deltaTime) {
             var (rLast, gLast, bLast) = _lastColors[index];
 
-            // linear interpolation
-            r = (int)(r * Smoothing + rLast * (1 - Smoothing));
-            g = (int)(g * Smoothing + gLast * (1 - Smoothing));
-            b = (int)(b * Smoothing + bLast * (1 - Smoothing));
+            var smoothingFactor = Math.Min(1, deltaTime / Smoothing);
+            var rDiff = r - rLast;
+            var gDiff = g - gLast;
+            var bDiff = b - bLast;
+
+            r = (int)(rLast + rDiff * smoothingFactor);
+            g = (int)(gLast + gDiff * smoothingFactor);
+            b = (int)(bLast + bDiff * smoothingFactor);
 
             _lastColors[index] = (r, g, b);
 

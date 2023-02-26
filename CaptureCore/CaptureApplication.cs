@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
@@ -46,6 +47,10 @@ namespace CaptureCore {
 
         public float GammaCorrection {
             set => _encoder.GammaCorrection = value;
+        }
+
+        public float LuminanceCorrection {
+            set => _encoder.LuminanceCorrection = value;
         }
 
         public float Smoothing {

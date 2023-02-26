@@ -15,15 +15,123 @@ namespace Ui {
             get => _ledsPerEye;
             set {
                 _ledsPerEye = value;
-                //_captureApp.NumberOfLedsPerEye = value;
                 HMDPreview.LedPerEye = value;
+
+                MaxVerticalSweep = 2f / value;
                 OnPropertyChanged();
             }
         }
 
+        public bool ShowLedValues {
+            get => _showLedValues;
+            set {
+                _showLedValues = value;
+                HMDPreview.ShowColorValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public float PreviewBlur {
+            get => _previewBlur;
+            set {
+                _previewBlur = value;
+                HMDPreview.BlurPercentage = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int LedBrightness {
+            get => _ledBrightness;
+            set {
+                HMDPreview.Brightness = value;
+                _ledBrightness = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public float HorizontalSweep {
+            get => _horizontalSweep;
+            set {
+                _horizontalSweep = value;
+                HMDPreview.HorizontalSweep = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public float VerticalSweep {
+            get => _verticalSweep;
+            set {
+                _verticalSweep = value;
+                HMDPreview.VerticalSweep = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public float MaxVerticalSweep {
+            get => _maxVerticalSweep;
+            set {
+                var relative = _verticalSweep / _maxVerticalSweep;
+                _maxVerticalSweep = value;
+                OnPropertyChanged();
+
+                VerticalSweep = relative * value;
+            }
+        }
+
+        public bool ShowSampleArea {
+            get => _showSampleArea;
+            set {
+                _showSampleArea = value;
+                HMDPreview.ShowSampleAreas = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public float Gamma {
+            get => _gamma;
+            set {
+                _gamma = value;
+                HMDPreview.GammaCorrection = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int Smoothing {
+            get => _smoothing;
+            set {
+                _smoothing = value;
+                HMDPreview.Smoothing = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public float Luminance {
+            get => _luminance;
+            set {
+                _luminance = value;
+                HMDPreview.LuminanceCorrection = value;
+                OnPropertyChanged();
+            }
+        }
+
+        #region Backing Fields
+
+        private int _ledsPerEye;
+        private bool _showLedValues;
+        private float _previewBlur;
+        private float _verticalSweep;
+        private float _maxVerticalSweep;
+        private float _horizontalSweep;
+        private int _ledBrightness;
+        private bool _showSampleArea;
+        private float _gamma;
+        private int _smoothing;
+        private float _luminance;
+
+        #endregion Backing Fields
+
         private ObservableCollection<Process> _processes;
         private ObservableCollection<MonitorInfo> _monitors;
-        private int _ledsPerEye;
 
         public MainWindow() {
             InitializeComponent();
@@ -31,6 +139,7 @@ namespace Ui {
             // Force graphicscapture.dll to load.
             var _ = new GraphicsCapturePicker();
 #endif
+            Closing += Save;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -39,17 +148,36 @@ namespace Ui {
 
             HMDPreview.Window_Loaded(sender, e);
 
-            // TODO: read from settings
-            LedsPerEye = 8;
-            HMDPreview.Brightness = 5;
-            HMDPreview.VerticalSweep = 0.1f;
-            HMDPreview.BlurPercentage = 0;
-            HMDPreview.GammaCorrection = 2;
-            HMDPreview.Smoothing = 10;
-            // TODO: read from settings
+            Load();
 
-            HMDPreview.HorizontalSweep = 1f / LedsPerEye;
             HMDPreview.Resize(ControlsGrid.ActualWidth);
+        }
+
+        private void Load() {
+            LedsPerEye = Properties.Settings.Default.LedsPerEye;
+            ShowLedValues = Properties.Settings.Default.ShowLedValues;
+            LedBrightness = Properties.Settings.Default.LedBrightness;
+            PreviewBlur = Properties.Settings.Default.PreviewBlur;
+            Gamma = Properties.Settings.Default.GammaCorrection;
+            Luminance = Properties.Settings.Default.LuminanceCorrection;
+            Smoothing = Properties.Settings.Default.InputSmoothing;
+            ShowSampleArea = Properties.Settings.Default.ShowSampleAreas;
+            VerticalSweep = Properties.Settings.Default.VerticalSweep;
+            HorizontalSweep = Properties.Settings.Default.HorizontalSweep;
+        }
+
+        private void Save(object _, CancelEventArgs __) {
+            Properties.Settings.Default.LedsPerEye = LedsPerEye;
+            Properties.Settings.Default.ShowLedValues = ShowLedValues;
+            Properties.Settings.Default.LedBrightness = LedBrightness;
+            Properties.Settings.Default.PreviewBlur = PreviewBlur;
+            Properties.Settings.Default.GammaCorrection = Gamma;
+            Properties.Settings.Default.LuminanceCorrection = Luminance;
+            Properties.Settings.Default.InputSmoothing = Smoothing;
+            Properties.Settings.Default.ShowSampleAreas = ShowSampleArea;
+            Properties.Settings.Default.VerticalSweep = VerticalSweep;
+            Properties.Settings.Default.HorizontalSweep = HorizontalSweep;
+            Properties.Settings.Default.Save();
         }
 
         private async void PickerButton_Click(object sender, RoutedEventArgs e) {
@@ -121,48 +249,6 @@ namespace Ui {
 
                 SetWindowTitle();
             }
-        }
-
-        private void BlurSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            var blur = e.NewValue / ((Slider)sender).Maximum;
-            HMDPreview.BlurPercentage = (float)blur;
-        }
-
-        private void Brightness_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            var brightness = e.NewValue / ((Slider)sender).Maximum;
-            HMDPreview.Brightness = (float)brightness;
-        }
-
-        private void HorizontalSweep_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            var sweep = e.NewValue / ((Slider)sender).Maximum;
-            HMDPreview.HorizontalSweep = Math.Max((float)sweep, 0.01f);
-        }
-
-        private void VerticalSweep_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            var sweep = e.NewValue / ((Slider)sender).Maximum;
-            HMDPreview.VerticalSweep = Math.Max((float)sweep, 0.01f);
-        }
-
-        private void LedValues_OnToggled(object sender, RoutedEventArgs e) {
-            HMDPreview.ShowColorValue = ((CheckBox)sender).IsChecked.Value;
-        }
-
-        private void SampleAreas_OnToggled(object sender, RoutedEventArgs e) {
-            HMDPreview.ShowSampleAreas = ((CheckBox)sender).IsChecked.Value;
-        }
-
-        private void Gamma_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            var correction = e.NewValue / ((Slider)sender).Maximum;
-            HMDPreview.GammaCorrection = (float)correction;
-        }
-
-        private void Smoothing_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            var correction = e.NewValue / ((Slider)sender).Maximum;
-            HMDPreview.Smoothing = (float)correction;
-        }
-
-        private void Luminance_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            throw new NotImplementedException();
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e) {

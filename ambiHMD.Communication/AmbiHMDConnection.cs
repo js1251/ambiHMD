@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace ambiHMD.Communication {
     public class AmbiHMDConnection {
         private readonly SerialPort _serialPort;
+        private DateTime _lastSend;
         public AmbiHMDConnection(int port, int baudRate) {
             _serialPort = new SerialPort {
                 PortName = $"COM{port}",
@@ -23,14 +24,12 @@ namespace ambiHMD.Communication {
             _lastSend = DateTime.Now;
         }
 
-        private DateTime _lastSend;
-
         public Task SendMessage(string message) {
             if (!_serialPort.IsOpen) {
                 return null; // TODO: handle
             }
             
-            if (DateTime.Now - _lastSend < TimeSpan.FromMilliseconds(30)) {
+            if (DateTime.Now - _lastSend < TimeSpan.FromMilliseconds(100)) {
                 return null;
             }
 

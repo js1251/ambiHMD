@@ -29,19 +29,15 @@ namespace Ui.customcontrols {
         public float BlurPercentage {
             set {
                 var ledSize = LeftLEDs.Size;
-                var maxBlurSize = ledSize * 2f;
-                // TODO: make depending on amount of leds too
+                var maxBlurSize = ledSize * 1.25f;
 
                 LeftLEDs.BlurRadius = maxBlurSize * value;
                 RightLEDs.BlurRadius = maxBlurSize * value;
             }
         }
 
-        public float Brightness {
-            set {
-                const int maxBrightness = 255;
-                _captureApp.Brightness = (int)(maxBrightness * value);
-            }
+        public int Brightness {
+            set => _captureApp.Brightness = value;
         }
 
         public float VerticalSweep {
@@ -81,6 +77,10 @@ namespace Ui.customcontrols {
 
         public float GammaCorrection {
             set => _captureApp.GammaCorrection = value;
+        }
+
+        public float LuminanceCorrection {
+            set => _captureApp.LuminanceCorrection = value;
         }
 
         public float Smoothing {

@@ -22,5 +22,125 @@ namespace Ui.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("8")]
+        public int LedsPerEye {
+            get {
+                return ((int)(this["LedsPerEye"]));
+            }
+            set {
+                this["LedsPerEye"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowLedValues {
+            get {
+                return ((bool)(this["ShowLedValues"]));
+            }
+            set {
+                this["ShowLedValues"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("67")]
+        public int LedBrightness {
+            get {
+                return ((int)(this["LedBrightness"]));
+            }
+            set {
+                this["LedBrightness"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.44")]
+        public float PreviewBlur {
+            get {
+                return ((float)(this["PreviewBlur"]));
+            }
+            set {
+                this["PreviewBlur"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2.29")]
+        public float GammaCorrection {
+            get {
+                return ((float)(this["GammaCorrection"]));
+            }
+            set {
+                this["GammaCorrection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.75")]
+        public float LuminanceCorrection {
+            get {
+                return ((float)(this["LuminanceCorrection"]));
+            }
+            set {
+                this["LuminanceCorrection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("80")]
+        public int InputSmoothing {
+            get {
+                return ((int)(this["InputSmoothing"]));
+            }
+            set {
+                this["InputSmoothing"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ShowSampleAreas {
+            get {
+                return ((bool)(this["ShowSampleAreas"]));
+            }
+            set {
+                this["ShowSampleAreas"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.12")]
+        public float VerticalSweep {
+            get {
+                return ((float)(this["VerticalSweep"]));
+            }
+            set {
+                this["VerticalSweep"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.25")]
+        public float HorizontalSweep {
+            get {
+                return ((float)(this["HorizontalSweep"]));
+            }
+            set {
+                this["HorizontalSweep"] = value;
+            }
+        }
     }
 }
