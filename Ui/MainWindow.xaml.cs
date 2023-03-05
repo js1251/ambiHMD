@@ -296,12 +296,13 @@ namespace Ui {
             HMDPreview.Resize(ControlsGrid.ActualWidth);
         }
 
-        private void ConnectButton_OnClick(object sender, RoutedEventArgs e) {
+        private void ConnectButton_OnClick(object _, RoutedEventArgs __) {
             try {
                 HMDPreview.ComPort = ComPort;
                 IsConnected = true;
-            } catch {
+            } catch(Exception e) {
                 IsConnected = false;
+                MessageBox.Show(e.Message);
             }
         }
 

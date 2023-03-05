@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace ambiHMD.Communication {
@@ -14,34 +13,30 @@ namespace ambiHMD.Communication {
             private get { return _numLeds; }
             set {
                 _numLeds = value;
-                _lastColors = new (int, int, int)[_numLeds * _stride];
+                _lastColors = new (int, int, int)[_numLeds * _inputStride];
             }
         }
 
-        private readonly int _stride;
+        private readonly int _inputStride;
         private int _numLeds;
 
         private (int, int, int)[] _lastColors;
 
-        public AmbiHMDEncoder(int numLeds, int stride) {
-            _stride = stride;
+        public AmbiHMDEncoder(int numLeds, int inputStride) {
+            _inputStride = inputStride;
             NumLeds = numLeds;
         }
 
-        public static string NullMessage() {
-            return "000";
-        }
-
-        public string Encode(byte[] ledData) {
-            if (ledData.Length != NumLeds * _stride) {
+        public byte[] Encode(byte[] ledData) {
+            if (ledData.Length != NumLeds * _inputStride) {
                 throw new InvalidDataException("Invalid data length");
             }
 
             var stream = new MemoryStream(ledData);
-            var dataPoints = ledData.Length / _stride;
+            var dataPoints = ledData.Length / _inputStride;
 
-            var leftEncoded = "";
-            var rightEncoded = "";
+            var leftEncoded = new MemoryStream(new byte[NumLeds / 2 * 3]);
+            var rightEncoded = new MemoryStream(new byte[NumLeds / 2 * 3]);
 
             var deltaTime = (DateTime.Now - _lastSmooth).TotalMilliseconds;
 
@@ -64,15 +59,23 @@ namespace ambiHMD.Communication {
                 // smoothing
                 (r, g, b) = Smooth(i, r, g, b, deltaTime);
 
-                var bStr = b.ToString("D3");
-                var gStr = g.ToString("D3");
-                var rStr = r.ToString("D3");
+                // clamp max value to allow terminator 0xFF
+                r = Math.Min(r, 254);
+                g = Math.Min(g, 254);
+                b = Math.Min(b, 254);
 
+                var rByte = Convert.ToByte(r);
+                var gByte = Convert.ToByte(g);
+                var bByte = Convert.ToByte(b);
 
                 if (i % 2 == 0) {
-                    leftEncoded += $"{rStr}{gStr}{bStr}";
+                    leftEncoded.WriteByte(rByte);
+                    leftEncoded.WriteByte(gByte);
+                    leftEncoded.WriteByte(bByte);
                 } else {
-                    rightEncoded += $"{rStr}{gStr}{bStr}";
+                    rightEncoded.WriteByte(rByte);
+                    rightEncoded.WriteByte(gByte);
+                    rightEncoded.WriteByte(bByte);
                 }
             }
 
@@ -80,7 +83,13 @@ namespace ambiHMD.Communication {
 
             stream.Close();
 
-            return Brightness.ToString("D3") + leftEncoded + rightEncoded;
+            var encoded = new MemoryStream(new byte[1 + leftEncoded.Length + rightEncoded.Length + 1]);
+            encoded.WriteByte(Convert.ToByte(Math.Min(Brightness, 254)));
+            encoded.Write(leftEncoded.ToArray(), 0, (int)leftEncoded.Length);
+            encoded.Write(rightEncoded.ToArray(), 0, (int)rightEncoded.Length);
+            encoded.Write(new byte[] { 0xFF }, 0, 1);
+
+            return encoded.ToArray();
         }
 
         private (int, int, int) GammaCorrect(int r, int g, int b) {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
@@ -18,7 +17,7 @@ namespace CaptureCore {
             private get => _numberOfLedPerEye;
             set {
                 _numberOfLedPerEye = value;
-                _encoder = new AmbiHMDEncoder(_numberOfLedPerEye * FrameProcessor.NUMBER_OF_EYES, FrameProcessor.DATA_STRIDE);
+                _encoder.NumLeds = value * FrameProcessor.NUMBER_OF_EYES;
                 if (_frameProcessor != null) {
                     _frameProcessor.NumberOfLedsPerEye = value;
                 }
@@ -108,8 +107,7 @@ namespace CaptureCore {
             _content.Brush = Brush;
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
-
-            //_ambiHmdConnection = new AmbiHMDConnection(2, 115200); // TODO: dynamic COM port!
+            
             _encoder = new AmbiHMDEncoder(NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES, FrameProcessor.DATA_STRIDE);
         }
 
@@ -144,14 +142,15 @@ namespace CaptureCore {
             Brush.Surface = null;
             _frameProcessor = null;
 
-            // turn all LEDs off
-            _ambiHmdConnection.SendMessage(AmbiHMDEncoder.NullMessage());
+            // TODO: turn all LEDs off
+            //_ambiHmdConnection?.SendMessage(AmbiHMDEncoder.NullMessage());
         }
 
         private void UpdateLedValues(object sender, Texture2D texture) {
             var ledData = _frameProcessor.ProcessFrame(texture);
+            
             var encoded = _encoder.Encode(ledData.Data);
-            _ambiHmdConnection.SendMessage(encoded);
+            _ambiHmdConnection?.SendMessage(encoded);
 
             var ledAmount = NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES;
 

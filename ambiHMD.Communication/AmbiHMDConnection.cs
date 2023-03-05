@@ -17,18 +17,18 @@ namespace ambiHMD.Communication {
             _lastSend = DateTime.Now;
         }
 
-        public Task SendMessage(string message) {
+        public Task SendMessage(byte[] message) {
             if (!_serialPort.IsOpen) {
                 return null; // TODO: handle
             }
             
-            if (DateTime.Now - _lastSend < TimeSpan.FromMilliseconds(100)) {
+            if (DateTime.Now - _lastSend < TimeSpan.FromMilliseconds(10)) {
                 return null;
             }
 
             _lastSend = DateTime.Now;
             return Task.Run(() => {
-                _serialPort.WriteLine(message);
+                _serialPort.Write(message, 0, message.Length);
             });
         }
     }

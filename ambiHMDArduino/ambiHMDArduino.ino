@@ -20,15 +20,8 @@
 // How many NeoPixels per eye
 #define LED_COUNT_PER_EYE 8
 
-// communication protocol
-#define TERMINATOR_CHAR '\n'
-
-// BRIGHTNESS(000-255) + 2 * LED_COUNT_PER_EYE * |R|G|B| (000-255) = 
-#define MAX_MESSAGE_LENGTH 147 // 3 + 2 * LED_COUNT_PER_EYE * (3 * 3);
-
 Adafruit_NeoPixel strip_left(LED_COUNT_PER_EYE, LED_PIN_LEFT, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel strip_right(LED_COUNT_PER_EYE, LED_PIN_RIGHT, NEO_GRB + NEO_KHZ800);
-
 
 // runs once at startup --------------------------------
 void setup() {
@@ -53,102 +46,59 @@ void setup() {
 
   // serial connection
   Serial.begin(115200);
+  //Serial.begin(9600);
 }
 
-// here to process incoming serial data after a terminator received
-void process_data(const char * data) {
-  static char byte_value[4];
-
-  // get the led brightness
-  byte_value[0] = data[0];
-  byte_value[1] = data[1];
-  byte_value[2] = data[2];
-  byte_value[3] = '\0';
-
-  int brightness = atoi(byte_value);
-
+void process_data(const byte * data) {
+  unsigned int brightness = data[0];
   strip_left.setBrightness(brightness);
   strip_right.setBrightness(brightness);
 
-  int offset = 3;
-  for (int i = 0; i < LED_COUNT_PER_EYE; i++) {
-    byte_value[0] = data[offset + (i * 9) + 0];
-    byte_value[1] = data[offset + (i * 9) + 1];
-    byte_value[2] = data[offset + (i * 9) + 2];
-    byte_value[3] = '\0';
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < LED_COUNT_PER_EYE; j++) {
+      // offset + 1 since first byte is brightness
+      unsigned int offset = (i * LED_COUNT_PER_EYE + j) * 3 + 1;
+      
+      unsigned int r = data[offset];
+      unsigned int g = data[offset + 1];
+      unsigned int b = data[offset + 2];
 
-    int r = atoi(byte_value);
-    byte_value[0] = data[offset + (i * 9) + 3];
-    byte_value[1] = data[offset + (i * 9) + 4];
-    byte_value[2] = data[offset + (i * 9) + 5];
-    byte_value[3] = '\0';
-
-    int g = atoi(byte_value);
-    byte_value[0] = data[offset + (i * 9) + 6];
-    byte_value[1] = data[offset + (i * 9) + 7];
-    byte_value[2] = data[offset + (i * 9) + 8];
-    byte_value[3] = '\0';
-
-    int b = atoi(byte_value);
-    strip_left.setPixelColor(i, strip_left.Color(r, g, b));
-  }
-
-  offset += LED_COUNT_PER_EYE * 3 * 3;
-  for (int i = 0; i < LED_COUNT_PER_EYE; i++) {
-    byte_value[0] = data[offset + (i * 9) + 0];
-    byte_value[1] = data[offset + (i * 9) + 1];
-    byte_value[2] = data[offset + (i * 9) + 2];
-    byte_value[3] = '\0';
-
-    int r = atoi(byte_value);
-    byte_value[0] = data[offset + (i * 9) + 3];
-    byte_value[1] = data[offset + (i * 9) + 4];
-    byte_value[2] = data[offset + (i * 9) + 5];
-    byte_value[3] = '\0';
-
-    int g = atoi(byte_value);
-    byte_value[0] = data[offset + (i * 9) + 6];
-    byte_value[1] = data[offset + (i * 9) + 7];
-    byte_value[2] = data[offset + (i * 9) + 8];
-    byte_value[3] = '\0';
-
-    int b = atoi(byte_value);
-    strip_right.setPixelColor(i, strip_right.Color(r, g, b));
+      if (i == 0) {
+        strip_left.setPixelColor(j, strip_left.Color(r, g, b));
+      } else {
+        strip_right.setPixelColor(j, strip_right.Color(r, g, b));
+      }
+    }
   }
 
   strip_left.show();
   strip_right.show();
 }
 
-void processIncomingByte(const byte inByte) {
-  static char input_line[MAX_MESSAGE_LENGTH];
-  static unsigned int input_pos = 0;
+void process_incoming(const byte inByte) {
+  static const unsigned int max_buffer_length = 1 + LED_COUNT_PER_EYE * 2 * 3;
+  static byte buffer[max_buffer_length];
+  static unsigned int buffer_pos;
 
-  switch (inByte) {
-    case '\n':   // end of text
-      input_line[MAX_MESSAGE_LENGTH] = 0;  // terminating null byte
-
-      // terminator reached! process input_line here ...
-      process_data(input_line);
-
-      // reset buffer for next time
-      input_pos = 0;  
-      break;
-    case '\r': // discard carriage return
-      break;
-
-    default:
-      // keep adding if not full ... allow for terminating null byte
-      if (input_pos < (MAX_MESSAGE_LENGTH - 1)) {
-        input_line[input_pos++] = inByte;
-      }
-      break;
+  // terminator reached
+  if (inByte == 255) {
+    process_data(buffer);
+    buffer_pos = 0;
+    return;
   }
+
+  // invalid message
+  if (buffer_pos >= max_buffer_length) {
+    buffer_pos = 0;
+  }
+
+  // add byte to buffer
+  buffer[buffer_pos] = inByte;
+  buffer_pos++;
 }
 
 void loop() {
-  // if serial data available, process it
-  while (Serial.available () > 0) {
-    processIncomingByte(Serial.read());
+  while (Serial.available() > 0) {
+    process_incoming(Serial.read());
   }
 }
