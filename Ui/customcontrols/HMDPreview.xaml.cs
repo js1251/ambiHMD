@@ -87,6 +87,10 @@ namespace Ui.customcontrols {
             set => _captureApp.Smoothing = value;
         }
 
+        public int ComPort {
+            set => _captureApp.ComPort = value;
+        }
+
         private IntPtr _hwnd;
         private Compositor _compositor;
         private CompositionTarget _target;

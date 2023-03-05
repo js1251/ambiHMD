@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO.Ports;
 using System.Threading.Tasks;
 
@@ -13,13 +12,7 @@ namespace ambiHMD.Communication {
                 BaudRate = baudRate
             };
 
-            try {
-                _serialPort.Open();
-            } catch {
-                // TODO: handle!
-                Debug.WriteLine("shit");
-                return;
-            }
+            _serialPort.Open();
 
             _lastSend = DateTime.Now;
         }

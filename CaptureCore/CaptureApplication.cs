@@ -64,6 +64,10 @@ namespace CaptureCore {
             set => _encoder.Brightness = value;
         }
 
+        public int ComPort {
+            set => _ambiHmdConnection = new AmbiHMDConnection(value, 115200);
+        }
+
         private Compositor _compositor;
         private readonly ContainerVisual _root;
 
@@ -77,7 +81,7 @@ namespace CaptureCore {
         private AmbiHMDEncoder _encoder;
         private int _numberOfLedPerEye;
 
-        private readonly AmbiHMDConnection _ambiHmdConnection;
+        private AmbiHMDConnection _ambiHmdConnection;
 
         public CaptureApplication(Compositor c) {
             _compositor = c;
@@ -105,7 +109,7 @@ namespace CaptureCore {
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
 
-            _ambiHmdConnection = new AmbiHMDConnection(2, 115200); // TODO: dynamic COM port!
+            //_ambiHmdConnection = new AmbiHMDConnection(2, 115200); // TODO: dynamic COM port!
             _encoder = new AmbiHMDEncoder(NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES, FrameProcessor.DATA_STRIDE);
         }
 

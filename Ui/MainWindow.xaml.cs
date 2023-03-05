@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.Capture;
 
@@ -21,6 +22,25 @@ namespace Ui {
                 OnPropertyChanged();
             }
         }
+
+        public int ComPort {
+            get => _comPort;
+            set {
+                _comPort = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsConnected {
+            get => _isConnected;
+            set {
+                _isConnected = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ConnectionColor));
+            }
+        }
+
+        public SolidColorBrush ConnectionColor => IsConnected ? Brushes.Green : Brushes.Red;
 
         public bool ShowLedValues {
             get => _showLedValues;
@@ -116,6 +136,7 @@ namespace Ui {
 
         #region Backing Fields
 
+        private int _comPort;
         private int _ledsPerEye;
         private bool _showLedValues;
         private float _previewBlur;
@@ -132,6 +153,7 @@ namespace Ui {
 
         private ObservableCollection<Process> _processes;
         private ObservableCollection<MonitorInfo> _monitors;
+        private bool _isConnected;
 
         public MainWindow() {
             InitializeComponent();
@@ -154,6 +176,7 @@ namespace Ui {
         }
 
         private void Load() {
+            ComPort = Properties.Settings.Default.ComPort;
             LedsPerEye = Properties.Settings.Default.LedsPerEye;
             ShowLedValues = Properties.Settings.Default.ShowLedValues;
             LedBrightness = Properties.Settings.Default.LedBrightness;
@@ -167,6 +190,7 @@ namespace Ui {
         }
 
         private void Save(object _, CancelEventArgs __) {
+            Properties.Settings.Default.ComPort = ComPort;
             Properties.Settings.Default.LedsPerEye = LedsPerEye;
             Properties.Settings.Default.ShowLedValues = ShowLedValues;
             Properties.Settings.Default.LedBrightness = LedBrightness;
@@ -270,6 +294,15 @@ namespace Ui {
             hideButton.Content = isVisible ? "▸" : "◂";
             ControlsGrid.Visibility = isVisible ? Visibility.Collapsed : Visibility.Visible;
             HMDPreview.Resize(ControlsGrid.ActualWidth);
+        }
+
+        private void ConnectButton_OnClick(object sender, RoutedEventArgs e) {
+            try {
+                HMDPreview.ComPort = ComPort;
+                IsConnected = true;
+            } catch {
+                IsConnected = false;
+            }
         }
 
         #region Capture Helpers

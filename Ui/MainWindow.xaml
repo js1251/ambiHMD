@@ -93,11 +93,59 @@
 
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <Grid
                 Grid.Row="0"
+                Margin="10, 10, 10, 0">
+                <Rectangle
+                    Stroke="Black"
+                    Opacity="0.3" />
+
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="50" />
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Content="COM port:" />
+                        <TextBox
+                            Grid.Column="1"
+                            Margin="0, 0, 5, 0"
+                            VerticalAlignment="Center"
+                            Text="{Binding ElementName=Root, Path=ComPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Ellipse
+                            Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            Margin="10, 0, 0, 0"
+                            Width="20"
+                            Height="20"
+                            Fill="{Binding ElementName=Root, Path=ConnectionColor, Mode=OneWay}" />
+
+                        <Button
+                            Grid.Column="1"
+                            Content="Try connection"
+                            Margin="10"
+                            Click="ConnectButton_OnClick" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+
+            <Grid
+                Grid.Row="1"
                 Margin="10, 10, 10, 0">
                 <Rectangle
                     Stroke="Black"
@@ -162,16 +210,20 @@
                         Margin="10, 5, 10, 10"
                         x:Name="StopButton"
                         Content="Stop Capture"
-                        Click="StopButton_Click"/>
+                        Click="StopButton_Click" />
                 </StackPanel>
             </Grid>
 
-
             <ScrollViewer
-                Grid.Row="1"
-                Margin="10, 10, 10, 0"
+                Grid.Row="2"
+                Margin="0, 10, 10, 0"
+                FlowDirection="RightToLeft"
+                VerticalScrollBarVisibility="Auto"
                 HorizontalScrollBarVisibility="Hidden">
-                <StackPanel Margin="0, 0, 10, 0">
+
+                <StackPanel
+                    Margin="0, 0, 10, 0"
+                    FlowDirection="LeftToRight">
                     <Grid>
                         <Rectangle
                             Stroke="Black"
@@ -180,13 +232,12 @@
                         <StackPanel>
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition />
+                                    <ColumnDefinition Width="50" />
                                 </Grid.ColumnDefinitions>
                                 <Label
                                     Grid.Column="0"
                                     VerticalAlignment="Center"
-                                    Margin="0, 0, 20, 0"
                                     Content="LEDs per eye:" />
                                 <TextBox
                                     Grid.Column="1"
@@ -198,7 +249,7 @@
                             <CheckBox
                                 Content="Show LED values"
                                 Margin="10"
-                                IsChecked="{Binding ElementName=Root, Path=ShowLedValues}"/>
+                                IsChecked="{Binding ElementName=Root, Path=ShowLedValues}" />
 
                             <Label Content="LED Brightness" />
                             <Slider
@@ -262,7 +313,7 @@
                             <CheckBox
                                 Content="Show Sample Areas"
                                 Margin="10"
-                                IsChecked="{Binding ElementName=Root, Path=ShowSampleArea}"/>
+                                IsChecked="{Binding ElementName=Root, Path=ShowSampleArea}" />
 
                             <Label Content="Vertical Sweep" />
                             <Slider

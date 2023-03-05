@@ -142,5 +142,17 @@ namespace Ui.Properties {
                 this["HorizontalSweep"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ComPort {
+            get {
+                return ((int)(this["ComPort"]));
+            }
+            set {
+                this["ComPort"] = value;
+            }
+        }
     }
 }
