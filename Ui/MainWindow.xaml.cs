@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Media;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.Capture;
-using Windows.UI.Xaml.Controls;
 using Button = System.Windows.Controls.Button;
 using ComboBox = System.Windows.Controls.ComboBox;
 using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
@@ -312,6 +311,28 @@ namespace Ui {
             }
         }
 
+        private void SettingsReset_OnClick(object sender, RoutedEventArgs e) {
+            // ask user to confirm
+            var messageBoxResult =
+                MessageBox.Show("Are you sure you want to reset all settings to their default values?",
+                    "Reset Settings", MessageBoxButton.YesNo);
+            if (messageBoxResult != MessageBoxResult.Yes) {
+                return;
+            }
+
+            var currentPort = Properties.Settings.Default.ComPort;
+
+            // reset settings
+            Properties.Settings.Default.Reset();
+
+            // dont reset port
+            Properties.Settings.Default.ComPort = currentPort;
+
+            // apply default settings
+            Properties.Settings.Default.Save();
+            LoadSettings();
+        }
+
         #region Capture Helpers
 
         private void InitWindowList() {
@@ -348,26 +369,6 @@ namespace Ui {
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private void SettingsReset_OnClick(object sender, RoutedEventArgs e) {
-            // ask user to confirm
-            var messageBoxResult = MessageBox.Show("Are you sure you want to reset all settings to their default values?", "Reset Settings", MessageBoxButton.YesNo);
-            if (messageBoxResult != MessageBoxResult.Yes) {
-                return;
-            }
-
-            var currentPort = Properties.Settings.Default.ComPort;
-
-            // reset settings
-            Properties.Settings.Default.Reset();
-
-            // dont reset port
-            Properties.Settings.Default.ComPort = currentPort;
-
-            // apply default settings
-            Properties.Settings.Default.Save();
-            LoadSettings();
         }
     }
 }

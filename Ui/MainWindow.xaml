@@ -218,7 +218,7 @@
                 Grid.Row="2"
                 Margin="0, 0, 10, 0"
                 FlowDirection="RightToLeft"
-                VerticalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Visible"
                 HorizontalScrollBarVisibility="Hidden">
 
                 <StackPanel

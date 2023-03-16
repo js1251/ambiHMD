@@ -14,7 +14,7 @@ using Windows.Graphics.Capture;
 
 namespace Ui.customcontrols {
     public partial class HMDPreview : UserControl {
-        private int _ledPerEye;
+        #region Properties
 
         public int LedPerEye {
             get => _ledPerEye;
@@ -91,29 +91,42 @@ namespace Ui.customcontrols {
             set => _captureApp.ComPort = value;
         }
 
+        #endregion Properties
+
+        #region Fields
+
+        private int _ledPerEye;
         private IntPtr _hwnd;
         private Compositor _compositor;
         private CompositionTarget _target;
         private ContainerVisual _root;
-
         private CaptureApplication _captureApp;
+
+        #endregion Fields
 
         public HMDPreview() {
             InitializeComponent();
         }
 
-        public void Resize(double width) {
+        /// <summary>
+        /// Resizes the preview window to the full screen leftOffset minus the given leftOffset to the left.
+        /// Used for when the settings tab on the left is expanded or collapsed.
+        /// </summary>
+        /// <param name="leftOffset">The amount of leftOffset to the left of the preview</param>
+        public void Resize(double leftOffset) {
             var presentationSource = PresentationSource.FromVisual(this);
             var dpiX = presentationSource.CompositionTarget.TransformToDevice.M11;
             // var dpiY = presentationSource.CompositionTarget.TransformToDevice.M22;
 
-            var controlsWidth = (float)(width * dpiX);
+            var controlsWidth = (float)(leftOffset * dpiX);
 
             var padding = LeftLEDs.Size + RightLEDs.Size; // led
             padding += (float)(LeftLEDs.Margin.Left + LeftLEDs.Margin.Right);
             padding += (float)(RightLEDs.Margin.Left + RightLEDs.Margin.Right);
+            padding *= (float)dpiX;
 
-            _root.Size = new Vector2(-controlsWidth - padding, 0);
+            _root.Size = new Vector2(-(controlsWidth + padding), 0);
+            //_root.Size = new Vector2(-1000, 0);
             _root.Offset = new Vector3(controlsWidth + padding * 0.5f, 0, 0);
         }
 
@@ -133,7 +146,7 @@ namespace Ui.customcontrols {
 
             // Setup the rest of the sample application.
             _captureApp = new CaptureApplication(_compositor);
-            _root.Children.InsertAtBottom(_captureApp.Visual);
+            _root.Children.InsertAtTop(_captureApp.Visual);
 
             _captureApp.ColorChanged += (captureApp, index, colorData) => {
                 if (LedPerEye <= 0) {
@@ -155,7 +168,8 @@ namespace Ui.customcontrols {
                 // left eye
                 index /= 2;
                 LeftLEDs.SetColor(index, color);
-            } else {
+            }
+            else {
                 // right eye
                 index = (index - 1) / 2;
                 RightLEDs.SetColor(index, color);

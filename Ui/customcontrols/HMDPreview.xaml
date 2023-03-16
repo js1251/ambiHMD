@@ -12,12 +12,6 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Rectangle
-            x:Name="PreviewPlaceholder"
-            Grid.Column="1"
-            Stroke="Red">
-        </Rectangle>
-
         <customcontrols:LEDStack
             x:Name="LeftLEDs"
             Margin="20, 0, 20, 0"
