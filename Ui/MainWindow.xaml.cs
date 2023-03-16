@@ -5,10 +5,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 using Windows.Foundation.Metadata;
 using Windows.Graphics.Capture;
+using Windows.UI.Xaml.Controls;
+using Button = System.Windows.Controls.Button;
+using ComboBox = System.Windows.Controls.ComboBox;
+using SelectionChangedEventArgs = System.Windows.Controls.SelectionChangedEventArgs;
 
 namespace Ui {
     public partial class MainWindow : Window, INotifyPropertyChanged {
@@ -161,7 +164,7 @@ namespace Ui {
             // Force graphicscapture.dll to load.
             var _ = new GraphicsCapturePicker();
 #endif
-            Closing += Save;
+            Closing += SaveSettings;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -170,12 +173,12 @@ namespace Ui {
 
             HMDPreview.Window_Loaded(sender, e);
 
-            Load();
+            LoadSettings();
 
             HMDPreview.Resize(ControlsGrid.ActualWidth);
         }
 
-        private void Load() {
+        private void LoadSettings() {
             ComPort = Properties.Settings.Default.ComPort;
             LedsPerEye = Properties.Settings.Default.LedsPerEye;
             ShowLedValues = Properties.Settings.Default.ShowLedValues;
@@ -189,7 +192,7 @@ namespace Ui {
             HorizontalSweep = Properties.Settings.Default.HorizontalSweep;
         }
 
-        private void Save(object _, CancelEventArgs __) {
+        private void SaveSettings(object _, CancelEventArgs __) {
             Properties.Settings.Default.ComPort = ComPort;
             Properties.Settings.Default.LedsPerEye = LedsPerEye;
             Properties.Settings.Default.ShowLedValues = ShowLedValues;
@@ -237,7 +240,8 @@ namespace Ui {
                 MonitorComboPlaceholder.Visibility = Visibility.Visible;
 
                 SetWindowTitle(process.MainWindowTitle);
-            } catch(Exception) {
+            }
+            catch (Exception) {
                 Debug.WriteLine($"Hwnd 0x{hwnd.ToInt32():X8} is not valid for capture!");
                 _processes.Remove(process);
                 comboBox.SelectedIndex = -1;
@@ -265,7 +269,8 @@ namespace Ui {
                 WindowComboPlaceholder.Visibility = Visibility.Visible;
 
                 SetWindowTitle(monitor.DeviceName);
-            } catch(Exception) {
+            }
+            catch (Exception) {
                 Debug.WriteLine($"Hmon 0x{hmon.ToInt32():X8} is not valid for capture!");
                 _monitors.Remove(monitor);
                 comboBox.SelectedIndex = -1;
@@ -300,7 +305,8 @@ namespace Ui {
             try {
                 HMDPreview.ComPort = ComPort;
                 IsConnected = true;
-            } catch(Exception e) {
+            }
+            catch (Exception e) {
                 IsConnected = false;
                 MessageBox.Show(e.Message);
             }
@@ -316,7 +322,8 @@ namespace Ui {
                     select p;
                 _processes = new ObservableCollection<Process>(processesWithWindows);
                 WindowComboBox.ItemsSource = _processes;
-            } else {
+            }
+            else {
                 WindowComboBox.IsEnabled = false;
             }
         }
@@ -325,7 +332,8 @@ namespace Ui {
             if (ApiInformation.IsApiContractPresent(typeof(Windows.Foundation.UniversalApiContract).FullName, 8)) {
                 _monitors = new ObservableCollection<MonitorInfo>(MonitorEnumerationHelper.GetMonitors());
                 MonitorComboBox.ItemsSource = _monitors;
-            } else {
+            }
+            else {
                 MonitorComboBox.IsEnabled = false;
             }
         }
@@ -340,6 +348,26 @@ namespace Ui {
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private async void SettingsReset_OnClick(object sender, RoutedEventArgs e) {
+            // ask user to confirm
+            var messageBoxResult = MessageBox.Show("Are you sure you want to reset all settings to their default values?", "Reset Settings", MessageBoxButton.YesNo);
+            if (messageBoxResult != MessageBoxResult.Yes) {
+                return;
+            }
+
+            var currentPort = Properties.Settings.Default.ComPort;
+
+            // reset settings
+            Properties.Settings.Default.Reset();
+
+            // dont reset port
+            Properties.Settings.Default.ComPort = currentPort;
+
+            // apply default settings
+            Properties.Settings.Default.Save();
+            LoadSettings();
         }
     }
 }
