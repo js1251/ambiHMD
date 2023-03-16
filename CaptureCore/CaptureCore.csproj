@@ -4,9 +4,10 @@
     <TargetFramework>net48</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <!--<PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.22621.755" />-->
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.WindowsRuntime" Version="4.6.0-preview4.19212.13" />
     <PackageReference Include="WaveEngine.Bindings.RenderDoc" Version="3.1126.1061" />
   </ItemGroup>
 

@@ -3,10 +3,10 @@ using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.UI.Composition;
-using Windows.UI.Xaml;
 using Composition.WindowsRuntimeHelpers;
 using SharpDX.Direct3D11;
 using ambiHMD.Communication;
+using Windows.UI;
 
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
@@ -25,6 +25,9 @@ namespace CaptureCore {
                 if (_frameProcessor != null) {
                     _frameProcessor.NumberOfLedsPerEye = value;
                 }
+
+                CreateSweepAreas();
+                ResizeSweepAreas();
             }
         }
 
@@ -35,6 +38,8 @@ namespace CaptureCore {
                 if (_frameProcessor != null) {
                     _frameProcessor.VerticalSweep = value;
                 }
+
+                ResizeSweepAreas();
             }
         }
 
@@ -45,6 +50,8 @@ namespace CaptureCore {
                 if (_frameProcessor != null) {
                     _frameProcessor.HorizontalSweep = value;
                 }
+
+                ResizeSweepAreas();
             }
         }
 
@@ -89,6 +96,7 @@ namespace CaptureCore {
         private int _numberOfLedPerEye;
 
         private AmbiHMDConnection _ambiHmdConnection;
+        private ShapeVisual _rectVisual;
 
         #endregion Fields
 
@@ -113,13 +121,39 @@ namespace CaptureCore {
             _content.AnchorPoint = new Vector2(0.5f, 0.5f);
             _content.RelativeOffsetAdjustment = new Vector3(0.5f, 0.5f, 0);
             _content.RelativeSizeAdjustment = Vector2.One;
-            //_content.Size = new Vector2(-80, -80);
             _content.Brush = Brush;
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
 
+            _rectVisual = _compositor.CreateShapeVisual();
+            _rectVisual.AnchorPoint = new Vector2(0.5f, 0.5f);
+            _rectVisual.RelativeOffsetAdjustment = new Vector3(0.5f, 0.5f, 0);
+            _rectVisual.RelativeSizeAdjustment = Vector2.One;
+            _root.Children.InsertAtTop(_rectVisual);
+
             _encoder = new AmbiHMDEncoder(NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES,
                 FrameProcessor.DATA_STRIDE);
+        }
+
+        private void CreateSweepAreas() {
+            _rectVisual.Shapes.Clear();
+
+            var strokeBrush = _compositor.CreateColorBrush(Colors.Red);
+            for (var i = 0; i < FrameProcessor.NUMBER_OF_EYES; i++) {
+                for (var j = 0; j < _numberOfLedPerEye; j++) {
+                    var rect = _compositor.CreateRectangleGeometry();
+                    rect.Size = new Vector2(100, 40);
+                    rect.Offset = new Vector2(i * 200, j * 50);
+                    var rectShape = _compositor.CreateSpriteShape(rect);
+                    rectShape.StrokeBrush = strokeBrush;
+                    _rectVisual.Shapes.Add(rectShape);
+                }
+            }
+
+        }
+
+        private void ResizeSweepAreas() {
+            // TODO: adjust rect sizes and offsets depending on window size and sweep areas
         }
 
         public void Dispose() {
