@@ -3,15 +3,19 @@ using System.Numerics;
 using Windows.Graphics.Capture;
 using Windows.Graphics.DirectX.Direct3D11;
 using Windows.UI.Composition;
+using Windows.UI.Xaml;
 using Composition.WindowsRuntimeHelpers;
 using SharpDX.Direct3D11;
 using ambiHMD.Communication;
 
 namespace CaptureCore {
     public sealed class CaptureApplication : IDisposable {
+        #region Properties
+
         public delegate void ColorChangedArg(CaptureApplication sender, int index, byte[] colorData);
 
         public event ColorChangedArg ColorChanged;
+        public Visual Visual => _root;
 
         public int NumberOfLedsPerEye {
             private get => _numberOfLedPerEye;
@@ -67,6 +71,10 @@ namespace CaptureCore {
             set => _ambiHmdConnection = new AmbiHMDConnection(value, 115200);
         }
 
+        #endregion Properties
+
+        #region Fields
+
         private Compositor _compositor;
         private readonly ContainerVisual _root;
 
@@ -81,6 +89,8 @@ namespace CaptureCore {
         private int _numberOfLedPerEye;
 
         private AmbiHMDConnection _ambiHmdConnection;
+
+        #endregion Fields
 
         public CaptureApplication(Compositor c) {
             _compositor = c;
@@ -107,11 +117,10 @@ namespace CaptureCore {
             _content.Brush = Brush;
             _content.Shadow = shadow;
             _root.Children.InsertAtTop(_content);
-            
-            _encoder = new AmbiHMDEncoder(NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES, FrameProcessor.DATA_STRIDE);
-        }
 
-        public Visual Visual => _root;
+            _encoder = new AmbiHMDEncoder(NumberOfLedsPerEye * FrameProcessor.NUMBER_OF_EYES,
+                FrameProcessor.DATA_STRIDE);
+        }
 
         public void Dispose() {
             StopCapture();
@@ -131,7 +140,8 @@ namespace CaptureCore {
 
             _capture.StartCapture();
 
-            _frameProcessor = new FrameProcessor(_capture.D3dDevice, NumberOfLedsPerEye, _verticalSweep, _horizontalSweep);
+            _frameProcessor =
+                new FrameProcessor(_capture.D3dDevice, NumberOfLedsPerEye, _verticalSweep, _horizontalSweep);
 
             _capture.TextureChanged += UpdateLedValues;
             _capture.TextureSizeChanged += UpdateFrameSize;
@@ -148,7 +158,7 @@ namespace CaptureCore {
 
         private void UpdateLedValues(object sender, Texture2D texture) {
             var ledData = _frameProcessor.ProcessFrame(texture);
-            
+
             var encoded = _encoder.Encode(ledData.Data);
             _ambiHmdConnection?.SendMessage(encoded);
 

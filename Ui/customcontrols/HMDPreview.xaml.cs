@@ -101,6 +101,8 @@ namespace Ui.customcontrols {
         private CompositionTarget _target;
         private ContainerVisual _root;
         private CaptureApplication _captureApp;
+        private Window _window;
+        private GraphicsCaptureItem _currentItem;
 
         #endregion Fields
 
@@ -126,12 +128,33 @@ namespace Ui.customcontrols {
             padding *= (float)dpiX;
 
             _root.Size = new Vector2(-(controlsWidth + padding), 0);
-            //_root.Size = new Vector2(-1000, 0);
             _root.Offset = new Vector3(controlsWidth + padding * 0.5f, 0, 0);
+
+            ResizeLedHeight();
+        }
+
+        private void ResizeLedHeight() {
+            if (_currentItem is null) {
+                return;
+            }
+
+            var dpiX = PresentationSource.FromVisual(this).CompositionTarget.TransformToDevice.M11;
+            var previewWidth = _window.Width + _root.Size.X * 1 / dpiX;
+            var aspectRatio = _currentItem.Size.Width / (float)_currentItem.Size.Height;
+
+            var ledHeight = previewWidth * 1 / aspectRatio;
+            LeftLEDs.Height = ledHeight;
+            RightLEDs.Height = ledHeight;
+        }
+
+        private void ResetLedHeight() {
+            LeftLEDs.Height = double.NaN;
+            RightLEDs.Height = double.NaN;
         }
 
         public void Window_Loaded(object sender, RoutedEventArgs e) {
-            var interopWindow = new WindowInteropHelper(sender as Window);
+            _window = sender as Window;
+            var interopWindow = new WindowInteropHelper(_window);
             _hwnd = interopWindow.Handle;
             _compositor = new Compositor();
 
@@ -147,6 +170,10 @@ namespace Ui.customcontrols {
             // Setup the rest of the sample application.
             _captureApp = new CaptureApplication(_compositor);
             _root.Children.InsertAtTop(_captureApp.Visual);
+
+            _window.SizeChanged += (object _, SizeChangedEventArgs __) => {
+                ResizeLedHeight();
+            };
 
             _captureApp.ColorChanged += (captureApp, index, colorData) => {
                 if (LedPerEye <= 0) {
@@ -190,24 +217,28 @@ namespace Ui.customcontrols {
         }
 
         public void StartHwndCapture(IntPtr hwnd) {
-            var item = CaptureHelper.CreateItemForWindow(hwnd);
-            if (item != null) {
-                _captureApp.StartCaptureFromItem(item);
+            _currentItem = CaptureHelper.CreateItemForWindow(hwnd);
+            if (_currentItem != null) {
+                _captureApp.StartCaptureFromItem(_currentItem);
+                ResizeLedHeight();
                 LedActive = true;
             }
         }
 
         public void StartHmonCapture(IntPtr hmon) {
-            var item = CaptureHelper.CreateItemForMonitor(hmon);
-            if (item != null) {
-                _captureApp.StartCaptureFromItem(item);
+            _currentItem = CaptureHelper.CreateItemForMonitor(hmon);
+            if (_currentItem != null) {
+                _captureApp.StartCaptureFromItem(_currentItem);
+                ResizeLedHeight();
                 LedActive = true;
             }
         }
 
         public void StopCapture() {
             _captureApp.StopCapture();
+            _currentItem = null;
             LedActive = false;
+            ResetLedHeight();
         }
     }
 }
