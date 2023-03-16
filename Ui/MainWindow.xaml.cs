@@ -350,7 +350,7 @@ namespace Ui {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private async void SettingsReset_OnClick(object sender, RoutedEventArgs e) {
+        private void SettingsReset_OnClick(object sender, RoutedEventArgs e) {
             // ask user to confirm
             var messageBoxResult = MessageBox.Show("Are you sure you want to reset all settings to their default values?", "Reset Settings", MessageBoxButton.YesNo);
             if (messageBoxResult != MessageBoxResult.Yes) {
