@@ -24,10 +24,10 @@ namespace CaptureCore {
                 _encoder.NumLeds = value * FrameProcessor.NUMBER_OF_EYES;
                 if (_frameProcessor != null) {
                     _frameProcessor.NumberOfLedsPerEye = value;
-                }
 
-                CreateSweepAreas();
-                ResizeSweepAreas();
+                    CreateSweepAreas();
+                    ResizeSweepAreas();
+                }
             }
         }
 
@@ -37,9 +37,8 @@ namespace CaptureCore {
 
                 if (_frameProcessor != null) {
                     _frameProcessor.VerticalSweep = value;
+                    ResizeSweepAreas();
                 }
-
-                ResizeSweepAreas();
             }
         }
 
@@ -49,9 +48,24 @@ namespace CaptureCore {
 
                 if (_frameProcessor != null) {
                     _frameProcessor.HorizontalSweep = value;
+                    ResizeSweepAreas();
+                }
+            }
+        }
+
+        public bool ShowSampleAreas {
+            get => _showSampleAreas;
+            set {
+                if (!value) {
+                    _rectVisual.Shapes.Clear();
+                    return;
                 }
 
-                ResizeSweepAreas();
+                _showSampleAreas = value;
+                if (_frameProcessor != null) {
+                    CreateSweepAreas();
+                    ResizeSweepAreas();
+                }
             }
         }
 
@@ -78,6 +92,10 @@ namespace CaptureCore {
             set => _ambiHmdConnection = new AmbiHMDConnection(value, 115200);
         }
 
+        public double CaptureWidth { get; set; }
+        public double CaptureHeight { get; set; }
+        public double WindowHeight { get; set; }
+
         #endregion Properties
 
         #region Fields
@@ -97,6 +115,7 @@ namespace CaptureCore {
 
         private AmbiHMDConnection _ambiHmdConnection;
         private ShapeVisual _rectVisual;
+        private bool _showSampleAreas;
 
         #endregion Fields
 
@@ -136,24 +155,43 @@ namespace CaptureCore {
         }
 
         private void CreateSweepAreas() {
+            if (!ShowSampleAreas) {
+                return;
+            }
+
             _rectVisual.Shapes.Clear();
 
-            var strokeBrush = _compositor.CreateColorBrush(Colors.Red);
-            for (var i = 0; i < FrameProcessor.NUMBER_OF_EYES; i++) {
-                for (var j = 0; j < _numberOfLedPerEye; j++) {
+            var strokeBrush = _compositor.CreateColorBrush(Colors.DarkRed);
+            for (var x = 0; x < FrameProcessor.NUMBER_OF_EYES; x++) {
+                for (var y = 0; y < _numberOfLedPerEye; y++) {
                     var rect = _compositor.CreateRectangleGeometry();
-                    rect.Size = new Vector2(100, 40);
-                    rect.Offset = new Vector2(i * 200, j * 50);
                     var rectShape = _compositor.CreateSpriteShape(rect);
                     rectShape.StrokeBrush = strokeBrush;
                     _rectVisual.Shapes.Add(rectShape);
                 }
             }
-
         }
 
-        private void ResizeSweepAreas() {
-            // TODO: adjust rect sizes and offsets depending on window size and sweep areas
+        public void ResizeSweepAreas() {
+            if (!ShowSampleAreas) {
+                return;
+            }
+
+            for (var i = 0; i < _rectVisual.Shapes.Count; i++) {
+                var xIndex = i >= _numberOfLedPerEye ? 1 : 0;
+                var yIndex = xIndex == 1 ? i - _numberOfLedPerEye : i;
+
+                var (left, top, right, bottom) = _frameProcessor.GetStencil(xIndex, yIndex, (int)CaptureWidth, (int)CaptureHeight);
+
+                var offset = (int)(WindowHeight / 2f - CaptureHeight / 2f);
+
+                top += offset;
+                bottom += offset;
+
+                var rect = (CompositionRectangleGeometry)((CompositionSpriteShape)_rectVisual.Shapes[i]).Geometry;
+                rect.Size = new Vector2(right - left, bottom - top);
+                rect.Offset = new Vector2(left, top);
+            }
         }
 
         public void Dispose() {
@@ -176,6 +214,8 @@ namespace CaptureCore {
 
             _frameProcessor =
                 new FrameProcessor(_capture.D3dDevice, NumberOfLedsPerEye, _verticalSweep, _horizontalSweep);
+
+            CreateSweepAreas();
 
             _capture.TextureChanged += UpdateLedValues;
             _capture.TextureSizeChanged += UpdateFrameSize;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Windows.UI.Xaml.Media;
 using SharpDX.Direct3D11;
 using WaveEngine.Bindings.RenderDoc;
 
@@ -50,8 +51,6 @@ namespace CaptureCore {
         private Resource _stagingBuffer;
         private ShaderResourceView _srv;
 
-        private float _xRightStart;
-
         //private readonly RenderDoc _renderDoc;
 
         public FrameProcessor(Device d3dDevice, int numberOfLedsPerEye, float verticalSweep, float horizontalSweep) {
@@ -70,27 +69,36 @@ namespace CaptureCore {
             InitializeBuffers();
         }
 
+        public (int, int, int, int) GetStencil(int xIndex, int yIndex, int targetWidth, int targetHeight) {
+            var xRightStart = targetWidth - HorizontalSweep * targetWidth;
+            var left = (int)Math.Floor(xIndex > 0 ? xRightStart : 0);
+
+            var yDivider = (float)targetHeight / NumberOfLedsPerEye;
+            var yMiddleOffset = yIndex * yDivider + 0.5f * yDivider;
+            var yTopOffset = yMiddleOffset - 0.5f * targetHeight * VerticalSweep;
+            var top = (int)Math.Floor(yTopOffset);
+            top = Math.Max(top, 0);
+
+            var right = left + (int)Math.Floor(HorizontalSweep * targetWidth);
+            var bottom = top + (int)Math.Floor(VerticalSweep * targetHeight);
+            bottom = Math.Min(bottom, targetHeight);
+
+            return (left, Math.Max(top, 0), right, bottom);
+        }
+
         public LedData ProcessFrame(Texture2D frame) {
             var ledData = new LedData(NumberOfLedsPerEye * NUMBER_OF_EYES, DATA_STRIDE);
 
             for (var y = 0; y < NumberOfLedsPerEye; y++) {
                 for (var x = 0; x < NUMBER_OF_EYES; x++) {
-                    var xStart = (int)Math.Floor(x > 0 ? _xRightStart : 0);
-
-                    var yDivider = (float)_frameHeight / (NumberOfLedsPerEye + 1);
-                    var yMiddleOffset = (y + 1) * yDivider;
-                    var yTopOffset = yMiddleOffset - 0.5f * _frameHeight * VerticalSweep;
-                    var yStart = (int)Math.Floor(yTopOffset);
-
-                    var stencilWidth = (int)Math.Floor(HorizontalSweep * _frameWidth);
-                    var stencilHeight = (int)Math.Floor(VerticalSweep * _frameHeight);
+                    var (left, top, right, bottom) = GetStencil(x, y, _frameWidth, _frameHeight);
 
                     var sourceRegion = new ResourceRegion {
-                        Left = xStart,
-                        Top = Math.Max(yStart, 0),
+                        Left = left,
+                        Right = right,
+                        Top = top,
+                        Bottom = bottom,
                         Front = 0,
-                        Right = xStart + stencilWidth,
-                        Bottom = Math.Min(yStart + stencilHeight, _frameHeight),
                         Back = 1
                     };
 
@@ -133,8 +141,6 @@ namespace CaptureCore {
         }
 
         private void InitializeBuffers() {
-            _xRightStart = _frameWidth - HorizontalSweep * _frameWidth;
-
             var stencilWidth = (int)Math.Floor(HorizontalSweep * _frameWidth);
             var stencilHeight = (int)Math.Floor(VerticalSweep * _frameHeight);
 

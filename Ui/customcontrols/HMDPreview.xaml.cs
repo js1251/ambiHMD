@@ -70,9 +70,7 @@ namespace Ui.customcontrols {
         }
 
         public bool ShowSampleAreas {
-            set {
-                // TODO
-            }
+            set => _captureApp.ShowSampleAreas = value;
         }
 
         public float GammaCorrection {
@@ -131,6 +129,8 @@ namespace Ui.customcontrols {
             _root.Offset = new Vector3(controlsWidth + padding * 0.5f, 0, 0);
 
             ResizeLedHeight();
+            _captureApp.WindowHeight = ActualHeight;
+            _captureApp.ResizeSweepAreas();
         }
 
         private void ResizeLedHeight() {
@@ -142,9 +142,12 @@ namespace Ui.customcontrols {
             var previewWidth = _window.Width + _root.Size.X * 1 / dpiX;
             var aspectRatio = _currentItem.Size.Width / (float)_currentItem.Size.Height;
 
-            var ledHeight = previewWidth * 1 / aspectRatio;
-            LeftLEDs.Height = ledHeight;
-            RightLEDs.Height = ledHeight;
+            var previewHeight = previewWidth * 1 / aspectRatio;
+            LeftLEDs.Height = previewHeight;
+            RightLEDs.Height = previewHeight;
+
+            _captureApp.CaptureWidth = previewWidth;
+            _captureApp.CaptureHeight = previewHeight;
         }
 
         private void ResetLedHeight() {
@@ -171,8 +174,18 @@ namespace Ui.customcontrols {
             _captureApp = new CaptureApplication(_compositor);
             _root.Children.InsertAtTop(_captureApp.Visual);
 
-            _window.SizeChanged += (object _, SizeChangedEventArgs __) => {
+            _window.SizeChanged += (object _, SizeChangedEventArgs args) => {
                 ResizeLedHeight();
+
+                _captureApp.WindowHeight = args.NewSize.Height - SystemParameters.WindowCaptionHeight;
+                _captureApp.ResizeSweepAreas();
+            };
+            
+            // detect fullscreen toggle
+            _window.StateChanged += (object _, EventArgs __) => {
+                ResizeLedHeight();
+                _captureApp.WindowHeight = ActualHeight;
+                _captureApp.ResizeSweepAreas();
             };
 
             _captureApp.ColorChanged += (captureApp, index, colorData) => {
