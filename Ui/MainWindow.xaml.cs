@@ -189,6 +189,7 @@ namespace Ui {
             ShowSampleArea = Properties.Settings.Default.ShowSampleAreas;
             VerticalSweep = Properties.Settings.Default.VerticalSweep;
             HorizontalSweep = Properties.Settings.Default.HorizontalSweep;
+            ShowLedValues = Properties.Settings.Default.ShowLedValues;
         }
 
         private void SaveSettings(object _, CancelEventArgs __) {
@@ -203,6 +204,7 @@ namespace Ui {
             Properties.Settings.Default.ShowSampleAreas = ShowSampleArea;
             Properties.Settings.Default.VerticalSweep = VerticalSweep;
             Properties.Settings.Default.HorizontalSweep = HorizontalSweep;
+            Properties.Settings.Default.ShowLedValues = ShowLedValues;
             Properties.Settings.Default.Save();
         }
 
