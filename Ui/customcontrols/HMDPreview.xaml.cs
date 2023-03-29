@@ -102,6 +102,9 @@ namespace Ui.customcontrols {
         private Window _window;
         private GraphicsCaptureItem _currentItem;
 
+        private double _dpiX;
+        private double _dpiY;
+
         #endregion Fields
 
         public HMDPreview() {
@@ -115,21 +118,21 @@ namespace Ui.customcontrols {
         /// <param name="leftOffset">The amount of leftOffset to the left of the preview</param>
         public void Resize(double leftOffset) {
             var presentationSource = PresentationSource.FromVisual(this);
-            var dpiX = presentationSource.CompositionTarget.TransformToDevice.M11;
-            // var dpiY = presentationSource.CompositionTarget.TransformToDevice.M22;
+            _dpiX = presentationSource.CompositionTarget.TransformToDevice.M11;
+            _dpiY = presentationSource.CompositionTarget.TransformToDevice.M22;
 
-            var controlsWidth = (float)(leftOffset * dpiX);
+            var controlsWidth = (float)(leftOffset * _dpiX);
 
             var padding = LeftLEDs.Size + RightLEDs.Size; // led
             padding += (float)(LeftLEDs.Margin.Left + LeftLEDs.Margin.Right);
             padding += (float)(RightLEDs.Margin.Left + RightLEDs.Margin.Right);
-            padding *= (float)dpiX;
+            padding *= (float)_dpiX;
 
             _root.Size = new Vector2(-(controlsWidth + padding), 0);
             _root.Offset = new Vector3(controlsWidth + padding * 0.5f, 0, 0);
 
             ResizeLedHeight();
-            _captureApp.WindowHeight = ActualHeight;
+            _captureApp.WindowHeight = ActualHeight * _dpiY;
             _captureApp.ResizeSweepAreas();
         }
 
@@ -137,17 +140,16 @@ namespace Ui.customcontrols {
             if (_currentItem is null) {
                 return;
             }
-
-            var dpiX = PresentationSource.FromVisual(this).CompositionTarget.TransformToDevice.M11;
-            var previewWidth = _window.Width + _root.Size.X * 1 / dpiX;
+            
+            var previewWidth = _window.Width + _root.Size.X * 1 / _dpiX;
             var aspectRatio = _currentItem.Size.Width / (float)_currentItem.Size.Height;
 
             var previewHeight = previewWidth * 1 / aspectRatio;
             LeftLEDs.Height = previewHeight;
             RightLEDs.Height = previewHeight;
 
-            _captureApp.CaptureWidth = previewWidth;
-            _captureApp.CaptureHeight = previewHeight;
+            _captureApp.CaptureWidth = previewWidth * _dpiX;
+            _captureApp.CaptureHeight = previewHeight * _dpiY;
         }
 
         private void ResetLedHeight() {
@@ -177,14 +179,14 @@ namespace Ui.customcontrols {
             _window.SizeChanged += (object _, SizeChangedEventArgs args) => {
                 ResizeLedHeight();
 
-                _captureApp.WindowHeight = args.NewSize.Height - SystemParameters.WindowCaptionHeight;
+                _captureApp.WindowHeight = args.NewSize.Height * _dpiY  - SystemParameters.WindowCaptionHeight;
                 _captureApp.ResizeSweepAreas();
             };
             
             // detect fullscreen toggle
             _window.StateChanged += (object _, EventArgs __) => {
                 ResizeLedHeight();
-                _captureApp.WindowHeight = ActualHeight;
+                _captureApp.WindowHeight = ActualHeight * _dpiY;
                 _captureApp.ResizeSweepAreas();
             };
 
