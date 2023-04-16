@@ -181,7 +181,8 @@ namespace CaptureCore {
                 var xIndex = i >= _numberOfLedPerEye ? 1 : 0;
                 var yIndex = xIndex == 1 ? i - _numberOfLedPerEye : i;
 
-                var (left, top, right, bottom) = _frameProcessor.GetStencil(xIndex, yIndex, (int)CaptureWidth, (int)CaptureHeight);
+                var (left, top, right, bottom) =
+                    _frameProcessor.GetStencil(xIndex, yIndex, (int)CaptureWidth, (int)CaptureHeight);
 
                 var offset = (int)(WindowHeight / 2f - CaptureHeight / 2f);
 
@@ -226,8 +227,7 @@ namespace CaptureCore {
             Brush.Surface = null;
             _frameProcessor = null;
 
-            // TODO: turn all LEDs off
-            //_ambiHmdConnection?.SendMessage(AmbiHMDEncoder.NullMessage());
+            _ambiHmdConnection?.SendMessage(_encoder.EncodeDark());
         }
 
         private void UpdateLedValues(object sender, Texture2D texture) {

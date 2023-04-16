@@ -27,6 +27,22 @@ namespace ambiHMD.Communication {
             NumLeds = numLeds;
         }
 
+        public byte[] EncodeDark() {
+            var dataPoints = NumLeds * _inputStride;
+
+            var result = new byte[dataPoints + 2]; // brightness and terminator
+
+            result[0] = 0x00;
+
+            for (var i = 1; i < dataPoints; i++) {
+                result[i] = 0x00;
+            }
+
+            result[dataPoints + 1] = 0xFF;
+
+            return result;
+        }
+
         public byte[] Encode(byte[] ledData) {
             if (ledData.Length != NumLeds * _inputStride) {
                 throw new InvalidDataException("Invalid data length");
